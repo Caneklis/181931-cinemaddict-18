@@ -1,19 +1,25 @@
 import { createElement } from '../render.js';
 
-const createFilmsListTemplate = (modifier, title) =>
-  `<section class="films-list ${modifier}">${title}</section>`;
+const createFilmsListTemplate = (title, hiddenTitle, extra) =>
+  `<section class="films-list  ${
+    extra ? ' films-list--extra' : ''
+  }"><h2 class="films-list__title  ${
+    hiddenTitle ? ' visually-hidden' : ''
+  } ">${title}</h2></section>`;
 
 export default class FilmsListView {
-  modifier;
   title;
+  hiddenTitle;
+  extra;
 
-  constructor(modifier = '', title = '') {
-    this.modifier = modifier;
+  constructor(title = '', hiddenTitle, extra) {
     this.title = title;
+    this.hiddenTitle = hiddenTitle;
+    this.extra = extra;
   }
 
   getTemplate() {
-    return createFilmsListTemplate(this.modifier, this.title);
+    return createFilmsListTemplate(this.title, this.hiddenTitle, this.extra);
   }
 
   getElement() {
@@ -22,6 +28,14 @@ export default class FilmsListView {
     }
 
     return this.element;
+  }
+
+  setExtraType() {
+    this.isExtraType = true;
+
+    if (this.isExtraType) {
+      this.element.classList.add('films-list--extra');
+    }
   }
 
   removeElement() {
