@@ -6,56 +6,48 @@ import { render, RenderPosition } from '../render.js';
 
 import FilmsListPresenter from './films-list-presenter';
 import FilmsModel from '../model/films-model.js';
+import FilmsListRatedPresenter from './films-list-rated-presenter.js';
+import FilmsListAllPresenter from './films-list-all-presenter.js';
+import FilmsListMostCommentedPresenter from './films-list-most-commented-presenter.js';
 // import CommentsModel from '../model/comments-model.js';
 
 export default class FilmsPresenter {
-  constructor(cards, comments) {
-    this.cards = cards;
-    this.comments = comments;
+  constructor(container, filmsModel, commentsModel) {
+    this.container = container;
+    this.filmsModel = filmsModel;
+    this.commentsModel = commentsModel;
   }
 
-  filmsComponent = new FilmsView();
+  filmView = new FilmsView();
 
-  init = (filmsContainer) => {
-    this.filmsContainer = filmsContainer;
+  init = () => {
 
     render(
       new NavigationView(),
-      this.filmsContainer,
+      this.container,
       RenderPosition.BEFOREBEGIN
     );
 
-    render(new SortView(), this.filmsContainer, RenderPosition.BEFOREBEGIN);
+    render(new SortView(), this.container, RenderPosition.BEFOREBEGIN);
 
-    render(this.filmsComponent, this.filmsContainer);
+    render(this.filmView, this.container);
 
-    const filmsMainPresenter = new FilmsListPresenter({
-      title: 'All movies. Upcoming',
-      hiddenTitle: true,
-      extra: false,
-      container: this.filmsComponent,
+    const filmsMainPresenter = new FilmsListAllPresenter({
+      container: this.filmView,
     });
-    const filmsModel = new FilmsModel();
-    const filmsTopModel = new FilmsModel();
-    const filmsCommentsModel = new FilmsModel();
-    filmsMainPresenter.init(filmsModel);
 
-    render(new LoadMoreButtonView(), this.filmsComponent.getElement());
+    filmsMainPresenter.init(this.filmsModel, this.commentsModel);
 
-    const filmsTopPresenter = new FilmsListPresenter({
-      title: 'Top rated',
-      hiddenTitle: false,
-      extra: true,
-      container: this.filmsComponent,
+    render(new LoadMoreButtonView(), this.filmView.getElement());
+
+    const filmsTopPresenter = new FilmsListRatedPresenter({
+      container: this.filmView,
     });
-    filmsTopPresenter.init(filmsTopModel);
+    filmsTopPresenter.init(this.filmsModel, this.commentsModel);
 
-    const filmsMostCommentedPresenter = new FilmsListPresenter({
-      title: 'Most commented',
-      hiddenTitle: false,
-      extra: true,
-      container: this.filmsComponent,
+    const filmsMostCommentedPresenter = new FilmsListMostCommentedPresenter({
+      container: this.filmView,
     });
-    filmsMostCommentedPresenter.init(filmsCommentsModel);
+    filmsMostCommentedPresenter.init(this.filmsModel, this.commentsModel);
   };
 }

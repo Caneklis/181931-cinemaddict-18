@@ -1,8 +1,8 @@
 import FilmsView from '../view/films-view.js';
 import FilmsListView from '../view/films-list-view.js';
 import FilmsListContainerView from '../view/films-list-container-view.js';
-import filmCardView from '../view/film-card-view.js';
 import { render } from '../render.js';
+import FilmPresenter from './film-presenter.js';
 
 export default class FilmsListPresenter {
   title;
@@ -12,7 +12,7 @@ export default class FilmsListPresenter {
   constructor({ title = '', hiddenTitle = false, extra, container }) {
     this.container = container;
 
-    this.filmsListTopRatedComponent = new FilmsListView(
+    this.filmsListView = new FilmsListView(
       title,
       hiddenTitle,
       extra
@@ -21,23 +21,28 @@ export default class FilmsListPresenter {
 
   filmsComponent = new FilmsView();
 
-  filmsListTopRatedContainerComponent = new FilmsListContainerView();
+  filmsListContainerView = new FilmsListContainerView();
 
-  init = (filmsModel) => {
+  prepearFilms = (films) => films;
+
+  init = (filmsModel, commentsModel) => {
     this.filmsModel = filmsModel;
-    this.cards = [...this.filmsModel.getFilms()];
+    this.commentsModel = commentsModel;
+    this.cards = this.prepearFilms([...this.filmsModel.getFilms()]);
 
-    render(this.filmsListTopRatedComponent, this.container.getElement());
+    render(this.filmsListView, this.container.getElement());
     render(
-      this.filmsListTopRatedContainerComponent,
-      this.filmsListTopRatedComponent.getElement()
+      this.filmsListContainerView,
+      this.filmsListView.getElement()
     );
 
-    for (let i = 0; i < this.cards.length; i++) {
-      render(
-        new filmCardView(this.cards[i]),
-        this.filmsListTopRatedContainerComponent.getElement()
-      );
-    }
+    this.cards.forEach((film) => {
+      this.createFilm(film);
+    });
+  };
+
+  createFilm = (film) => {
+    const filmPresenter = new FilmPresenter(this.filmsListContainerView.getElement());
+    filmPresenter.init(film, this.commentsModel.getCommentsForFilm(film.id));
   };
 }
