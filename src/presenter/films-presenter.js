@@ -1,86 +1,53 @@
 import FilmsView from '../view/films-view.js';
-import FilmsListView from '../view/films-list-view.js';
-import FilmsListContainerView from '../view/films-list-container-view.js';
-import filmCardView from '../view/film-card-view.js';
 import LoadMoreButtonView from '../view/load-more-button-view.js';
 import NavigationView from '../view/navigation-view.js';
 import SortView from '../view/sort-view.js';
 import { render, RenderPosition } from '../render.js';
 
+import FilmsListPresenter from './films-list-presenter';
+import FilmsModel from '../model/films-model.js';
+import FilmsListRatedPresenter from './films-list-rated-presenter.js';
+import FilmsListAllPresenter from './films-list-all-presenter.js';
+import FilmsListMostCommentedPresenter from './films-list-most-commented-presenter.js';
+// import CommentsModel from '../model/comments-model.js';
+
 export default class FilmsPresenter {
-  filmsComponent = new FilmsView();
+  constructor(container, filmsModel, commentsModel) {
+    this.container = container;
+    this.filmsModel = filmsModel;
+    this.commentsModel = commentsModel;
+  }
 
-  filmsListComponent = new FilmsListView(
-    '',
-    '<h2 class="films-list__title visually-hidden">All movies. Upcoming</h2>'
-  );
+  filmView = new FilmsView();
 
-  filmsListContainerComponent = new FilmsListContainerView();
-
-  filmsListTopRatedComponent = new FilmsListView(
-    'films-list--extra',
-    '<h2 class="films-list__title">Top rated</h2>'
-  );
-
-  filmsListTopRatedContainerComponent = new FilmsListContainerView();
-
-  filmsListMostCommentedComponent = new FilmsListView(
-    'films-list--extra',
-    '<h2 class="films-list__title">Most commented</h2>'
-  );
-
-  filmsListContainerMostCommentedComponent = new FilmsListContainerView();
-
-  init = (filmsContainer) => {
-    this.filmsContainer = filmsContainer;
+  init = () => {
 
     render(
       new NavigationView(),
-      this.filmsContainer,
+      this.container,
       RenderPosition.BEFOREBEGIN
     );
-    render(new SortView(), this.filmsContainer, RenderPosition.BEFOREBEGIN);
 
-    render(this.filmsComponent, this.filmsContainer);
-    render(this.filmsListComponent, this.filmsComponent.getElement());
-    render(
-      this.filmsListContainerComponent,
-      this.filmsListComponent.getElement()
-    );
+    render(new SortView(), this.container, RenderPosition.BEFOREBEGIN);
 
-    for (let i = 0; i < 5; i++) {
-      render(new filmCardView(), this.filmsListContainerComponent.getElement());
-    }
+    render(this.filmView, this.container);
 
-    render(new LoadMoreButtonView(), this.filmsComponent.getElement());
+    const filmsMainPresenter = new FilmsListAllPresenter({
+      container: this.filmView,
+    });
 
-    render(this.filmsListTopRatedComponent, this.filmsComponent.getElement());
-    render(
-      this.filmsListTopRatedContainerComponent,
-      this.filmsListTopRatedComponent.getElement()
-    );
+    filmsMainPresenter.init(this.filmsModel, this.commentsModel);
 
-    for (let i = 0; i < 2; i++) {
-      render(
-        new filmCardView(),
-        this.filmsListTopRatedContainerComponent.getElement()
-      );
-    }
+    render(new LoadMoreButtonView(), this.filmView.getElement());
 
-    render(
-      this.filmsListMostCommentedComponent,
-      this.filmsComponent.getElement()
-    );
-    render(
-      this.filmsListContainerMostCommentedComponent,
-      this.filmsListMostCommentedComponent.getElement()
-    );
+    const filmsTopPresenter = new FilmsListRatedPresenter({
+      container: this.filmView,
+    });
+    filmsTopPresenter.init(this.filmsModel, this.commentsModel);
 
-    for (let i = 0; i < 2; i++) {
-      render(
-        new filmCardView(),
-        this.filmsListContainerMostCommentedComponent.getElement()
-      );
-    }
+    const filmsMostCommentedPresenter = new FilmsListMostCommentedPresenter({
+      container: this.filmView,
+    });
+    filmsMostCommentedPresenter.init(this.filmsModel, this.commentsModel);
   };
 }
