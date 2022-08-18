@@ -1,7 +1,7 @@
 import { generateCard } from '../mock/card.js';
 
 export default class FilmsModel {
-  cards = Array.from({ length: 5 }, generateCard);
+  #cards = Array.from({ length: 20 }, generateCard);
 
-  getFilms = () => this.cards;
+  get films() {return this.#cards;}
 }

@@ -8,26 +8,27 @@ const createFilmsListTemplate = (title, hiddenTitle, extra) =>
   } ">${title}</h2></section>`;
 
 export default class FilmsListView {
-  title;
-  hiddenTitle;
-  extra;
+  #title = null;
+  #hiddenTitle = null;
+  #extra = null;
+  #element = null;
 
   constructor(title = '', hiddenTitle, extra) {
-    this.title = title;
-    this.hiddenTitle = hiddenTitle;
-    this.extra = extra;
+    this.#title = title;
+    this.#hiddenTitle = hiddenTitle;
+    this.#extra = extra;
   }
 
-  getTemplate() {
-    return createFilmsListTemplate(this.title, this.hiddenTitle, this.extra);
+  get template() {
+    return createFilmsListTemplate(this.#title, this.#hiddenTitle, this.#extra);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
     }
 
-    return this.element;
+    return this.#element;
   }
 
   setExtraType() {
@@ -39,6 +40,6 @@ export default class FilmsListView {
   }
 
   removeElement() {
-    this.element = null;
+    this.#element = null;
   }
 }
