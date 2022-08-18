@@ -51,7 +51,7 @@ export default class FilmPresenter {
         this.#popup = new PopupView(film, comments);
         render(this.#popup, document.querySelector('.footer'),
           RenderPosition.AFTEREND);
-        document.body.querySelector('.film-details__close-btn').addEventListener('click', () => {
+        this.#popup.element.querySelector('.film-details__close-btn').addEventListener('click', () => {
           hideDetailsComponent();
           window.removeEventListener('keydown', onWindowKeydown);
         });
@@ -62,7 +62,7 @@ export default class FilmPresenter {
       window.addEventListener('keydown', onWindowKeydown);
     };
 
-    cardComponent.element.querySelector('.film-card__link').addEventListener('click', (e) => {
+    cardComponent.element.querySelector('.film-card__link').addEventListener('click', () => {
       viewDetailsComponent();
     });
     render(cardComponent, this.#container);
