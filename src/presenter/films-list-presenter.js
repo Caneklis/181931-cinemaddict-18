@@ -63,7 +63,7 @@ export default class FilmsListPresenter {
 
   #createFilm = (film) => {
     const filmPresenter = new FilmPresenter(this.filmsListContainerView.element);
-    filmPresenter.init(film, this.#commentsModel.commentsForFilm);
+    filmPresenter.init(film, this.#commentsModel.get(film));
   };
 
   #handleLoadMoreButtonClick = (evt) => {

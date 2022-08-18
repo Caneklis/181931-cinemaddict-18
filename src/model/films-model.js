@@ -1,7 +1,7 @@
-import { generateCard } from '../mock/card.js';
+import { generateCards } from '../mock/card.js';
 
 export default class FilmsModel {
-  #cards = Array.from({ length: 20 }, generateCard);
+  #cards = generateCards();
 
   get = () => this.#cards;
 }

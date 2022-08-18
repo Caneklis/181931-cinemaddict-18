@@ -29,7 +29,8 @@ export default class FilmPresenter {
     //   );
     // });
 
-    const cardComponent = new FilmCardView(film);
+
+    const cardComponent = new FilmCardView(film, comments);
     const hideDetailsComponent = () => {
       this.#popup.element.remove();
       document.body.classList.remove('hide-overflow');

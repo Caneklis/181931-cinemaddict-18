@@ -24,34 +24,32 @@ const createPopupTemplate = (card, comments) => {
     userDetails: { watchlist, alreadyWatched, favorite },
   } = card;
 
+  const { author, comment: text, emotion } = comments;
+
   const getGenresList = (genresList) =>
     genresList
       .map((genre) => `<span class="film-details__genre">${genre}</span>`)
       .join('\n');
 
-  const createComment = (comment) => {
-    const { author, comment: text, emotion } = comment;
-
-    return `
-    <li class="film-details__comment">
-      <span class="film-details__comment-emoji">
-        <img src="./images/emoji/${emotion}.png" width="55" height="55" alt="emoji-${emotion}">
-      </span>
-      <div>
-        <p class="film-details__comment-text">${text}</p>
-        <p class="film-details__comment-info">
-          <span class="film-details__comment-author">${author}</span>
-          <span class="film-details__comment-day">${formatDate(
+  const createComment = () =>
+    `
+            <li class="film-details__comment">
+              <span class="film-details__comment-emoji">
+                <img src="./images/emoji/${emotion}.png" width="55" height="55" alt="emoji-${emotion}">
+              </span>
+              <div>
+                <p class="film-details__comment-text">${text}</p>
+                <p class="film-details__comment-info">
+                  <span class="film-details__comment-author">${author}</span>
+                  <span class="film-details__comment-day">${formatDate(
     date,
     'D/MMMM/YYYY HH:mm'
   )}</span>
-          <button class="film-details__comment-delete">Delete</button>
-        </p>
-      </div>
-    </li>
-    `;
-  };
-
+                  <button class="film-details__comment-delete">Delete</button>
+                </p>
+              </div>
+            </li>
+            `;
   return `<section class="film-details">
   <div class="film-details__inner">
     <div class="film-details__top-container">
@@ -140,7 +138,7 @@ const createPopupTemplate = (card, comments) => {
 }</span></h3>
 
         <ul class="film-details__comments-list">
-           ${comments.map(createComment).join('\n')}
+            ${comments.map(createComment).join('\n')}
         </ul>
 
         <form class="film-details__new-comment" action="" method="get">
@@ -183,8 +181,8 @@ export default class PopupView {
   #comments = null;
   #element = null;
 
-  constructor(card, comments) {
-    this.#card = card;
+  constructor(film, comments) {
+    this.#card = film;
     this.#comments = comments;
   }
 
