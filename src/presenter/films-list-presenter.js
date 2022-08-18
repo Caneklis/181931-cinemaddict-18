@@ -41,7 +41,7 @@ export default class FilmsListPresenter {
   init = (filmsModel, commentsModel) => {
     this.#filmsModel = filmsModel;
     this.#commentsModel = commentsModel;
-    this.#cards = this.prepearFilms([...this.#filmsModel.films]);
+    this.#cards = this.prepearFilms([...this.#filmsModel.get()]);
 
     render(this.#filmsListView, this.#container.element);
 
