@@ -28,12 +28,12 @@ const generatePoster = () => {
   return descriptions[randomIndex];
 };
 
-export const generateCard = () => ({
-  id: '0',
-  comments: [
-    getRandomInteger(1, 50).toString(),
-    getRandomInteger(51, 100).toString(),
-  ],
+const generateCard = () => ({
+  // id: '0',
+  // comments: [
+  //   getRandomInteger(1, 50).toString(),
+  //   getRandomInteger(51, 100).toString(),
+  // ],
   filmInfo: {
     title: generateDescription(),
     alternativeTitle: 'Laziness Who Sold Themselves',
@@ -64,3 +64,31 @@ export const generateCard = () => ({
     favorite: Boolean(getRandomInteger(0, 1)),
   },
 });
+
+const generateCards = () => {
+  const films = Array.from({ length: 20 }, generateCard);
+
+  let totalCommentsCount = 0;
+
+  return films.map((film, index) => {
+    const hasComments = getRandomInteger(0,1);
+
+    const filmsCommentsCount = (hasComments) ? getRandomInteger(1, 10) : 0;
+
+    totalCommentsCount += filmsCommentsCount;
+
+    return {
+      id: String(index + 1),
+      comments: (hasComments)
+        ? Array.from({length: filmsCommentsCount},
+          (_value, commentIndex) => String(totalCommentsCount - commentIndex)
+        )
+        : [],
+      ...film
+
+    };
+  });
+
+};
+
+export {generateCards};

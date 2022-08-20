@@ -5,6 +5,8 @@ import {
   toggleFilmsControlClass,
 } from '../utils.js';
 
+const DESCRIPTION_COUNT = 140;
+
 const createFilmCardTemplate = (card) => {
   const {
     id,
@@ -36,7 +38,7 @@ const createFilmCardTemplate = (card) => {
               <span class="film-card__genre">${genre}</span>
             </p>
             <img src="${poster}" alt="" class="film-card__poster">
-            <p class="film-card__description">${description}</p>
+            <p class="film-card__description">${description.length > DESCRIPTION_COUNT ? `${description.slice(0,DESCRIPTION_COUNT)}...` : description}</p>
             <span class="film-card__comments">${comments.length} comments</span>
           </a>
           <div class="film-card__controls">
@@ -57,25 +59,26 @@ const createFilmCardTemplate = (card) => {
 };
 
 export default class filmCardView {
-  card;
+  #card = null;
+  #element = null;
 
   constructor(card) {
-    this.card = card;
+    this.#card = card;
   }
 
-  getTemplate() {
-    return createFilmCardTemplate(this.card);
+  get template() {
+    return createFilmCardTemplate(this.#card);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
     }
 
-    return this.element;
+    return this.#element;
   }
 
   removeElement() {
-    this.element = null;
+    this.#element = null;
   }
 }
