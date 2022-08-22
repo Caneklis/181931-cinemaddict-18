@@ -1,5 +1,7 @@
 import { getRandomInteger } from '../utils.js';
 
+const FILMS_COUNT = 35;
+
 const generateDescription = () => {
   const descriptions = [
     'The Dance of Life',
@@ -29,11 +31,6 @@ const generatePoster = () => {
 };
 
 const generateCard = () => ({
-  // id: '0',
-  // comments: [
-  //   getRandomInteger(1, 50).toString(),
-  //   getRandomInteger(51, 100).toString(),
-  // ],
   filmInfo: {
     title: generateDescription(),
     alternativeTitle: 'Laziness Who Sold Themselves',
@@ -66,7 +63,7 @@ const generateCard = () => ({
 });
 
 const generateCards = () => {
-  const films = Array.from({ length: 20 }, generateCard);
+  const films = Array.from({ length: FILMS_COUNT }, generateCard);
 
   let totalCommentsCount = 0;
 
