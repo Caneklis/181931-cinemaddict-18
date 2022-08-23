@@ -15,7 +15,7 @@ export default class FilmsListPresenter {
   #filmsListContainerView = null;
   #filmsModel = null;
   #commentsModel = null;
-  #cards = null;
+  #films = null;
 
   constructor({ title = '', hiddenTitle = false, extra, container }) {
     this.#container = container;
@@ -41,7 +41,7 @@ export default class FilmsListPresenter {
   init = (filmsModel, commentsModel) => {
     this.#filmsModel = filmsModel;
     this.#commentsModel = commentsModel;
-    this.#cards = this.prepearFilms([...this.#filmsModel.get()]);
+    this.#films = this.prepearFilms([...this.#filmsModel.get()]);
 
     render(this.#filmsListView, this.#container.element);
 
@@ -50,31 +50,34 @@ export default class FilmsListPresenter {
       this.#filmsListView.element
     );
 
-    this.#cards.slice(0, 5).forEach((film) => {
+    this.#films.slice(0, 5).forEach((film) => {
       this.#createFilm(film);
     });
 
-    render(this.#loadMoreButtonComponent, this.#filmsListView.element);
+    if( this.#films.length > this.#renderedFilmCount) {
+      render(this.#loadMoreButtonComponent, this.#filmsListView.element);
+    }
 
 
-    this.#loadMoreButtonComponent.element.addEventListener('click', ()=> this.#handleLoadMoreButtonClick);
+    this.#loadMoreButtonComponent.element.addEventListener('click',
+      this.#handleLoadMoreButtonClick);
 
   };
 
   #createFilm = (film) => {
     const filmPresenter = new FilmPresenter(this.filmsListContainerView.element);
-    filmPresenter.init(film, this.#commentsModel.get(film));
+    filmPresenter.init(film, [...this.#commentsModel.get(film)]);
   };
 
-  #handleLoadMoreButtonClick = (evt) => {
-    evt.preventDefault();
-    this.#cards
+  #handleLoadMoreButtonClick = (e) => {
+    e.preventDefault();
+    this.#films
       .slice(this.#renderedFilmCount, this.#renderedFilmCount + TASK_COUNT_PER_STEP)
       .forEach((card) => this.#createFilm(card));
 
     this.#renderedFilmCount += TASK_COUNT_PER_STEP;
 
-    if (this.#renderedFilmCount >= this.#cards.length) {
+    if (this.#renderedFilmCount >= this.#films.length) {
       this.#loadMoreButtonComponent.element.remove();
       this.#loadMoreButtonComponent.removeElement();
     }

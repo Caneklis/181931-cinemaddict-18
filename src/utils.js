@@ -3,6 +3,10 @@ import duration from 'dayjs/esm/plugin/duration';
 
 dayjs.extend(duration);
 
+const ESCAPE_KEY_NAME = 'Escape';
+
+const isEscapeKey = (evt) => evt.key === ESCAPE_KEY_NAME;
+
 const formatDate = (date, format) => dayjs(date).format(format);
 
 const formatDuration = (time) =>
@@ -23,4 +27,5 @@ export {
   formatDuration,
   toggleFilmsControlClass,
   getRandomInteger,
+  isEscapeKey
 };

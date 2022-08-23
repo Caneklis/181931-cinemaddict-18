@@ -5,7 +5,7 @@ import {
   toggleFilmsControlClass,
 } from '../utils.js';
 
-const createPopupTemplate = (card, comments) => {
+const createPopupTemplate = (film, comments) => {
   const {
     filmInfo: {
       actors,
@@ -22,7 +22,7 @@ const createPopupTemplate = (card, comments) => {
       totalRating,
     },
     userDetails: { watchlist, alreadyWatched, favorite },
-  } = card;
+  } = film;
 
   const { author, comment: text, emotion } = comments;
 
@@ -177,17 +177,17 @@ const createPopupTemplate = (card, comments) => {
 };
 
 export default class PopupView {
-  #card = null;
+  #film = null;
   #comments = null;
   #element = null;
 
   constructor(film, comments) {
-    this.#card = film;
+    this.#film = film;
     this.#comments = comments;
   }
 
   get template() {
-    return createPopupTemplate(this.#card, this.#comments);
+    return createPopupTemplate(this.#film, this.#comments);
   }
 
   get element() {

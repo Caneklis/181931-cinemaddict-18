@@ -22,7 +22,6 @@ const generateEmojy = () => {
 };
 
 const generateComment = () => ({
-  // id: getRandomInteger(1, 100).toString(),
   author: 'Ilya O`Reilly',
   comment: generateDescription(),
   date: '2019-05-11T16:12:32.554Z',
