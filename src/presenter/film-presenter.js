@@ -1,7 +1,7 @@
 import PopupView from '../view/popup-view.js';
-import { render, RenderPosition } from '../render.js';
+import { render, remove, RenderPosition } from '../framework/render.js';
 import FilmCardView from '../view/film-card-view.js';
-import { isEscapeKey } from '../utils.js';
+import { isEscapeKey } from '../utils/common.js';
 export default class FilmPresenter {
   #container = null;
   #popup = null;
@@ -25,7 +25,6 @@ export default class FilmPresenter {
   }
 
   #renderFilmPopup = (film,comments) => {
-    this.popup = new PopupView(film, comments);
 
     if (!this.#popup) {
       this.#isPopupOpen = true;
@@ -33,29 +32,26 @@ export default class FilmPresenter {
       render(this.#popup, document.querySelector('.footer'),
         RenderPosition.AFTEREND);
       document.body.classList.add('hide-overflow');
-
-      const popupCloseButton = this.#popup.element.querySelector('.film-details__close-btn');
-      popupCloseButton.addEventListener('click', ()=>{
-        this.#hideFilmPopup();
-      });
-      document.body.classList.add('hide-overflow');
+      this.#popup.setClickHandler(this.hideFilmPopup);
       document.body.appendChild(this.#popup.element);
       window.addEventListener('keydown', this.#onWindowKeydown);
     }
+
   };
 
-  #hideFilmPopup(){
+  hideFilmPopup = () => {
     if (this.#isPopupOpen) {
-      this.#popup.element.remove();
+      remove(this.#popup);
       this.#popup = null;
       document.body.classList.remove('hide-overflow');
+      window.removeEventListener('keydown', this.#onWindowKeydown);
     }
-  }
+  };
 
   #onWindowKeydown = (evt) => {
     if (isEscapeKey(evt)) {
       evt.preventDefault();
-      this.#hideFilmPopup();
+      this.hideFilmPopup();
     }
   };
 }

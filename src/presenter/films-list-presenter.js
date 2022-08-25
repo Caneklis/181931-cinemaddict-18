@@ -1,25 +1,28 @@
 import FilmsView from '../view/films-view.js';
 import FilmsListView from '../view/films-list-view.js';
+import FilmsEmptyListView from '../view/films-list-empty.js';
 import FilmsListContainerView from '../view/films-list-container-view.js';
-import { render } from '../render.js';
+import { render } from '../framework/render.js';
 import FilmPresenter from './film-presenter.js';
 import LoadMoreButtonView from '../view/load-more-button-view.js';
 
-const TASK_COUNT_PER_STEP = 5;
+const FILMS_COUNT_PER_STEP = 5;
 export default class FilmsListPresenter {
   #title = null;
   #hiddenTitle = null;
   #extra = null;
   #container = null;
   #filmsListView = null;
+  #filmsEmptyListView = null;
   #filmsListContainerView = null;
   #filmsModel = null;
   #commentsModel = null;
   #films = null;
+  #loadMoreButtonComponent = null;
 
   constructor({ title = '', hiddenTitle = false, extra, container }) {
     this.#container = container;
-
+    this.#filmsEmptyListView = new FilmsEmptyListView();
     this.#filmsListView = new FilmsListView(
       title,
       hiddenTitle,
@@ -34,13 +37,14 @@ export default class FilmsListPresenter {
   prepearFilms = (films) => films;
 
 
-  #renderedFilmCount = TASK_COUNT_PER_STEP;
+  #renderedFilmCount = FILMS_COUNT_PER_STEP;
 
-  #loadMoreButtonComponent = new LoadMoreButtonView();
 
   init = (filmsModel, commentsModel) => {
     this.#filmsModel = filmsModel;
     this.#commentsModel = commentsModel;
+
+
     this.#films = this.prepearFilms([...this.#filmsModel.get()]);
 
     render(this.#filmsListView, this.#container.element);
@@ -55,12 +59,11 @@ export default class FilmsListPresenter {
     });
 
     if( this.#films.length > this.#renderedFilmCount) {
+      this.#loadMoreButtonComponent = new LoadMoreButtonView();
       render(this.#loadMoreButtonComponent, this.#filmsListView.element);
+      this.#loadMoreButtonComponent.setClickHandler(this.#handleLoadMoreButtonClick);
     }
 
-
-    this.#loadMoreButtonComponent.element.addEventListener('click',
-      this.#handleLoadMoreButtonClick);
 
   };
 
@@ -69,13 +72,12 @@ export default class FilmsListPresenter {
     filmPresenter.init(film, [...this.#commentsModel.get(film)]);
   };
 
-  #handleLoadMoreButtonClick = (e) => {
-    e.preventDefault();
+  #handleLoadMoreButtonClick = () => {
     this.#films
-      .slice(this.#renderedFilmCount, this.#renderedFilmCount + TASK_COUNT_PER_STEP)
+      .slice(this.#renderedFilmCount, this.#renderedFilmCount + FILMS_COUNT_PER_STEP)
       .forEach((card) => this.#createFilm(card));
 
-    this.#renderedFilmCount += TASK_COUNT_PER_STEP;
+    this.#renderedFilmCount += FILMS_COUNT_PER_STEP;
 
     if (this.#renderedFilmCount >= this.#films.length) {
       this.#loadMoreButtonComponent.element.remove();

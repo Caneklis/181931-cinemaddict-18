@@ -1,6 +1,6 @@
-import { getRandomInteger } from '../utils.js';
+import { getRandomInteger } from '../utils/common.js';
 
-const FILMS_COUNT = 35;
+const FILMS_COUNT = 20;
 
 const generateDescription = () => {
   const descriptions = [
