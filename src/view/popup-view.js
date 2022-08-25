@@ -190,7 +190,7 @@ export default class PopupView extends AbstractView {
     return createPopupTemplate(this.#film, this.#comments);
   }
 
-  setClickHandler = (callback) => {
+  setCloseClickHandler = (callback) => {
     // Мы могли бы сразу передать callback в addEventListener,
     // но тогда бы для удаления обработчика в будущем,
     // нам нужно было бы производить это снаружи, где-то там,

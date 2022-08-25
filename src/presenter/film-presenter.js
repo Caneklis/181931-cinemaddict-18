@@ -19,12 +19,10 @@ export default class FilmPresenter {
     const filmCardView = new FilmCardView(film);
     render(filmCardView, this.#container);
 
-    filmCardView.element.querySelector('.film-card__link').addEventListener('click', () => {
-      this.#renderFilmPopup(film,comments);
-    });
+    filmCardView.setOpenClickHandler(()=>{this.renderFilmPopup(film,comments);});
   }
 
-  #renderFilmPopup = (film,comments) => {
+  renderFilmPopup = (film,comments) => {
 
     if (!this.#popup) {
       this.#isPopupOpen = true;
@@ -32,7 +30,7 @@ export default class FilmPresenter {
       render(this.#popup, document.querySelector('.footer'),
         RenderPosition.AFTEREND);
       document.body.classList.add('hide-overflow');
-      this.#popup.setClickHandler(this.hideFilmPopup);
+      this.#popup.setCloseClickHandler(this.hideFilmPopup);
       document.body.appendChild(this.#popup.element);
       window.addEventListener('keydown', this.#onWindowKeydown);
     }
