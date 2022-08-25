@@ -1,4 +1,4 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import {
   formatDate,
   formatDuration,
@@ -176,12 +176,12 @@ const createPopupTemplate = (film, comments) => {
 </section>`;
 };
 
-export default class PopupView {
+export default class PopupView extends AbstractView {
   #film = null;
   #comments = null;
-  #element = null;
 
   constructor(film, comments) {
+    super();
     this.#film = film;
     this.#comments = comments;
   }
@@ -190,15 +190,21 @@ export default class PopupView {
     return createPopupTemplate(this.#film, this.#comments);
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
+  setCloseClickHandler = (callback) => {
+    // Мы могли бы сразу передать callback в addEventListener,
+    // но тогда бы для удаления обработчика в будущем,
+    // нам нужно было бы производить это снаружи, где-то там,
+    // где мы вызывали setClickHandler, что не всегда удобно
 
-    return this.#element;
-  }
+    // 1. Поэтому колбэк мы запишем во внутреннее свойство
+    this._callback.click = callback;
+    // 2. В addEventListener передадим абстрактный обработчик
+    this.element.querySelector('.film-details__close-btn').addEventListener('click', this.#clickHandler);
+  };
 
-  removeElement() {
-    this.#element = null;
-  }
+  #clickHandler = (evt) => {
+    evt.preventDefault();
+    // 3. А внутри абстрактного обработчика вызовем колбэк
+    this._callback.click();
+  };
 }

@@ -1,7 +1,7 @@
 import PopupView from '../view/popup-view.js';
-import { render, RenderPosition } from '../render.js';
+import { render, remove, RenderPosition } from '../framework/render.js';
 import FilmCardView from '../view/film-card-view.js';
-import { isEscapeKey } from '../utils.js';
+import { isEscapeKey } from '../utils/common.js';
 export default class FilmPresenter {
   #container = null;
   #popup = null;
@@ -19,13 +19,10 @@ export default class FilmPresenter {
     const filmCardView = new FilmCardView(film);
     render(filmCardView, this.#container);
 
-    filmCardView.element.querySelector('.film-card__link').addEventListener('click', () => {
-      this.#renderFilmPopup(film,comments);
-    });
+    filmCardView.setOpenClickHandler(()=>{this.renderFilmPopup(film,comments);});
   }
 
-  #renderFilmPopup = (film,comments) => {
-    this.popup = new PopupView(film, comments);
+  renderFilmPopup = (film,comments) => {
 
     if (!this.#popup) {
       this.#isPopupOpen = true;
@@ -33,29 +30,26 @@ export default class FilmPresenter {
       render(this.#popup, document.querySelector('.footer'),
         RenderPosition.AFTEREND);
       document.body.classList.add('hide-overflow');
-
-      const popupCloseButton = this.#popup.element.querySelector('.film-details__close-btn');
-      popupCloseButton.addEventListener('click', ()=>{
-        this.#hideFilmPopup();
-      });
-      document.body.classList.add('hide-overflow');
+      this.#popup.setCloseClickHandler(this.hideFilmPopup);
       document.body.appendChild(this.#popup.element);
       window.addEventListener('keydown', this.#onWindowKeydown);
     }
+
   };
 
-  #hideFilmPopup(){
+  hideFilmPopup = () => {
     if (this.#isPopupOpen) {
-      this.#popup.element.remove();
+      remove(this.#popup);
       this.#popup = null;
       document.body.classList.remove('hide-overflow');
+      window.removeEventListener('keydown', this.#onWindowKeydown);
     }
-  }
+  };
 
   #onWindowKeydown = (evt) => {
     if (isEscapeKey(evt)) {
       evt.preventDefault();
-      this.#hideFilmPopup();
+      this.hideFilmPopup();
     }
   };
 }
