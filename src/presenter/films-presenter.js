@@ -31,14 +31,8 @@ export default class FilmsPresenter {
     render(this.filmView, this.#container);
     if (films.length > 0) {
 
-      render(
-        new NavigationView(),
-        this.#container,
-        RenderPosition.BEFOREBEGIN
-      );
-
-      render(new SortView(), this.#container, RenderPosition.BEFOREBEGIN);
-
+      this.#renderNavigation();
+      this.#renderSort();
 
       const filmsMainPresenter = new FilmsListAllPresenter({
         container: this.filmView,
@@ -63,4 +57,17 @@ export default class FilmsPresenter {
       filmsEmptyPresenter.init(this.#filmsModel, this.#commentsModel);
     }
   };
+
+  #renderNavigation = () => {
+    render(
+      new NavigationView(),
+      this.#container,
+      RenderPosition.BEFOREBEGIN
+    );
+  };
+
+  #renderSort = ()=> {
+    render(new SortView(), this.#container, RenderPosition.BEFOREBEGIN);
+  };
+
 }
