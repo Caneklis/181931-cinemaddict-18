@@ -7,7 +7,7 @@ import {
 
 const DESCRIPTION_COUNT = 140;
 
-const createFilmCardTemplate = (card) => {
+const createFilmCardTemplate = (film) => {
   const {
     id,
     comments,
@@ -21,7 +21,7 @@ const createFilmCardTemplate = (card) => {
       release: { date },
     },
     userDetails: { watchlist, alreadyWatched, favorite },
-  } = card;
+  } = film;
 
   return `<article class="film-card"  id="${id}">
           <a class="film-card__link">
@@ -59,12 +59,12 @@ const createFilmCardTemplate = (card) => {
 };
 
 export default class filmCardView extends AbstractView {
-  #card = null;
+  #film = null;
   #element = null;
 
-  constructor(card) {
+  constructor(film) {
     super();
-    this.#card = card;
+    this.#film = film;
   }
 
   setOpenClickHandler = (callback) => {
@@ -86,6 +86,26 @@ export default class filmCardView extends AbstractView {
   };
 
   get template() {
-    return createFilmCardTemplate(this.#card);
+    return createFilmCardTemplate(this.#film);
   }
+
+  setFavoriteClickHandler = (callback) => {
+    this._callback.favoriteClick = callback;
+    this.element.querySelector('.film-card__controls-item--favorite').addEventListener('click', this.#favoriteClickHandler);
+  };
+
+  setArchiveClickHandler = (callback) => {
+    this._callback.archiveClick = callback;
+    this.element.querySelector('.film-card__controls-item--mark-as-watched').addEventListener('click', this.#archiveClickHandler);
+  };
+
+  #favoriteClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.favoriteClick();
+  };
+
+  #archiveClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.archiveClick();
+  };
 }

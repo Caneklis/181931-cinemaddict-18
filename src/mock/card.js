@@ -1,4 +1,5 @@
 import { getRandomInteger } from '../utils/common.js';
+import { nanoid } from 'nanoid';
 
 const FILMS_COUNT = 20;
 
@@ -67,7 +68,7 @@ const generateCards = () => {
 
   let totalCommentsCount = 0;
 
-  return films.map((film, index) => {
+  return films.map((film) => {
     const hasComments = getRandomInteger(0,1);
 
     const filmsCommentsCount = (hasComments) ? getRandomInteger(1, 10) : 0;
@@ -75,7 +76,7 @@ const generateCards = () => {
     totalCommentsCount += filmsCommentsCount;
 
     return {
-      id: String(index + 1),
+      id: nanoid(),
       comments: (hasComments)
         ? Array.from({length: filmsCommentsCount},
           (_value, commentIndex) => String(totalCommentsCount - commentIndex)

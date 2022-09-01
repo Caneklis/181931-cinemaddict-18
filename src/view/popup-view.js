@@ -207,4 +207,24 @@ export default class PopupView extends AbstractView {
     // 3. А внутри абстрактного обработчика вызовем колбэк
     this._callback.click();
   };
+
+  setFavoriteClickHandler = (callback) => {
+    this._callback.favoriteClick = callback;
+    this.element.querySelector('.film-details__control-button--favorite').addEventListener('click', this.#favoriteClickHandler);
+  };
+
+  setArchiveClickHandler = (callback) => {
+    this._callback.archiveClick = callback;
+    this.element.querySelector('.film-details__control-button--watched').addEventListener('click', this.#archiveClickHandler);
+  };
+
+  #favoriteClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.favoriteClick();
+  };
+
+  #archiveClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.archiveClick();
+  };
 }

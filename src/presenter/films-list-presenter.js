@@ -2,9 +2,10 @@ import FilmsView from '../view/films-view.js';
 import FilmsListView from '../view/films-list-view.js';
 import FilmsEmptyListView from '../view/films-list-empty.js';
 import FilmsListContainerView from '../view/films-list-container-view.js';
-import { render } from '../framework/render.js';
+import { render, remove } from '../framework/render.js';
 import FilmPresenter from './film-presenter.js';
 import LoadMoreButtonView from '../view/load-more-button-view.js';
+import { updateItem } from '../utils/common.js';
 
 const FILMS_COUNT_PER_STEP = 5;
 export default class FilmsListPresenter {
@@ -70,9 +71,9 @@ export default class FilmsListPresenter {
   };
 
   #createFilm = (film) => {
-    const filmPresenter = new FilmPresenter(this.filmsListContainerView.element);
+    const filmPresenter = new FilmPresenter(this.filmsListContainerView.element, this.#handleTaskChange, this.#handleModeChange);
     filmPresenter.init(film, [...this.#commentsModel.get(film)]);
-    // filmPresenter.set(film.id, filmPresenter);
+    this.#filmPresenter.set(film.id, filmPresenter);
   };
 
   #handleLoadMoreButtonClick = () => {
@@ -86,5 +87,21 @@ export default class FilmsListPresenter {
       this.#loadMoreButtonComponent.element.remove();
       this.#loadMoreButtonComponent.removeElement();
     }
+  };
+
+  #handleModeChange = () => {
+    this.#filmPresenter.forEach((presenter) => presenter.resetView());
+  };
+
+  #clearFilmsList = () => {
+    this.#filmPresenter.forEach((presenter) => presenter.destroy());
+    this.#filmPresenter.clear();
+    this.#renderedFilmCount = FILMS_COUNT_PER_STEP;
+    remove(this.#loadMoreButtonComponent);
+  };
+
+  #handleTaskChange = (updatedTask) => {
+    this.#films = updateItem(this.#films, updatedTask);
+    this.#filmPresenter.get(updatedTask.id).init(updatedTask);
   };
 }
