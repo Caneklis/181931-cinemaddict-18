@@ -71,7 +71,7 @@ export default class FilmsListPresenter {
   };
 
   #createFilm = (film) => {
-    const filmPresenter = new FilmPresenter(this.filmsListContainerView.element, this.#handleTaskChange, this.#handleModeChange);
+    const filmPresenter = new FilmPresenter(this.filmsListContainerView.element, this.#handleCardChange, this.#handleModeChange, this.#handleResetDetail);
     filmPresenter.init(film, [...this.#commentsModel.get(film)]);
     this.#filmPresenter.set(film.id, filmPresenter);
   };
@@ -100,8 +100,12 @@ export default class FilmsListPresenter {
     remove(this.#loadMoreButtonComponent);
   };
 
-  #handleTaskChange = (updatedTask) => {
+  #handleCardChange = (updatedTask) => {
     this.#films = updateItem(this.#films, updatedTask);
-    this.#filmPresenter.get(updatedTask.id).init(updatedTask);
+    this.#filmPresenter.get(updatedTask.id).init(updatedTask, [...this.#commentsModel.get(updatedTask)]);
+  };
+
+  #handleResetDetail = () => {
+    this.#filmPresenter.forEach((presenter) => presenter.resetDetailsView());
   };
 }

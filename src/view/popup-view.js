@@ -208,6 +208,11 @@ export default class PopupView extends AbstractView {
     this._callback.click();
   };
 
+  setWatchListClickHandler = (callback) => {
+    this._callback.watchlistClick = callback;
+    this.element.querySelector('.film-details__control-button--watchlist').addEventListener('click', this.#watchlistClickHandler);
+  };
+
   setFavoriteClickHandler = (callback) => {
     this._callback.favoriteClick = callback;
     this.element.querySelector('.film-details__control-button--favorite').addEventListener('click', this.#favoriteClickHandler);
@@ -218,13 +223,53 @@ export default class PopupView extends AbstractView {
     this.element.querySelector('.film-details__control-button--watched').addEventListener('click', this.#archiveClickHandler);
   };
 
-  #favoriteClickHandler = (evt) => {
+  #watchlistClickHandler = (evt) => {
     evt.preventDefault();
-    this._callback.favoriteClick();
+    this._callback.watchlistClick();
+  };
+
+  #watchListClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.archiveClick();
   };
 
   #archiveClickHandler = (evt) => {
     evt.preventDefault();
     this._callback.archiveClick();
   };
+
+  #favoriteClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.favoriteClick();
+  };
+
+  // setFavoriteClickHandler = (callback) => {
+  //   this._callback.favoriteClick = callback;
+  //   this.element.querySelector('.film-details__control-button--favorite').addEventListener('click', this.#favoriteClickHandler);
+  // };
+
+  // setArchiveClickHandler = (callback) => {
+  //   this._callback.archiveClick = callback;
+  //   this.element.querySelector('.film-details__control-button--watched').addEventListener('click', this.#archiveClickHandler);
+  // };
+
+  // setWatchListClickHandler = (callback) => {
+  //   this._callback.archiveClick = callback;
+  //   this.element.querySelector('.film-details__control-button--add-to-watchlist').addEventListener('click', this.#watchListClickHandler);
+  // };
+
+  // #favoriteClickHandler = (evt) => {
+  //   evt.preventDefault();
+  //   this._callback.favoriteClick();
+  // };
+
+  // #archiveClickHandler = (evt) => {
+  //   evt.preventDefault();
+  //   this._callback.archiveClick();
+  // };
+
+  // #watchListClickHandler = (evt) => {
+  //   evt.preventDefault();
+  //   this._callback.archiveClick();
+  // };
 }

@@ -1,5 +1,5 @@
 import PopupView from '../view/popup-view.js';
-import { render, remove, RenderPosition } from '../framework/render.js';
+import { render, remove, replace } from '../framework/render.js';
 import FilmCardView from '../view/film-card-view.js';
 import { isEscapeKey } from '../utils/common.js';
 
@@ -10,89 +10,118 @@ const Mode = {
 export default class FilmPresenter {
   #container = null;
   #popup = null;
-  #isPopupOpen = false;
   #filmCardView = null;
   #changeData = null;
   #film = null;
-
+  #isPopupOpen = false;
   #changeMode = null;
-
+  #resetView = null;
   #mode = Mode.DEFAULT;
 
-  constructor(container, changeData, changeMode) {
+  constructor(container, changeData, changeMode, resetView) {
     this.#container = container;
     this.#changeData = changeData;
     this.#changeMode = changeMode;
+    this.#resetView = resetView;
   }
 
   init = (film, comments) =>{
+    this.#film = film;
     this.#renderFilm(film, comments);
   };
 
   #renderFilm(film,comments) {
+    const oldFilmView = this.#filmCardView;
     this.#filmCardView = new FilmCardView(film);
-    render(this.#filmCardView, this.#container);
-
     this.#filmCardView.setFavoriteClickHandler(this.#handleFavoriteClick);
     this.#filmCardView.setArchiveClickHandler(this.#handleArchiveClick);
+    this.#filmCardView.setWatchListClickHandler(this.#handleWatchListClick);
+    this.#filmCardView.setOpenClickHandler(()=>{this.#renderFilmPopup(film,comments);});
 
-    this.#filmCardView.setOpenClickHandler(()=>{this.renderFilmPopup(film,comments);});
+    if (oldFilmView === null) {
+      render(this.#filmCardView, this.#container);
+      return;
+    }
+
+    if (this.#container.contains(oldFilmView.element)) {
+      replace(this.#filmCardView, oldFilmView);
+    }
+
+    remove(oldFilmView);
   }
 
-  #handleFavoriteClick = () => {
-    console.log(this.#film);
-    this.#changeData({...this.#film.userDetails.favorite , favorite: !this.#film.userDetails.favorite});
-  };
+  #renderFilmPopup = (film,comments) => {
+    if(this.#mode === Mode.DEFAULT) {
+      this.#resetView();
+      //Тут я хотел сделать, как выше с карточкой, но тоже не вышло
+      // const oldFilmView = this.#popup;
 
-  #handleArchiveClick = () => {
-    this.#changeData({...this.#film.userDetails.alreadyWatched, alreadyWatched: !this.#film.userDetails.alreadyWatched});
-  };
-
-  destroy = () => {
-    remove(this.#filmCardView);
-  };
-
-  renderFilmPopup = (film,comments) => {
-
-    if (this.#mode === Mode.DEFAULT) {
-      this.#isPopupOpen = true;
-      this.#mode = Mode.OPEN;
-      console.log(this.#mode);
       this.#popup = new PopupView(film, comments);
-
-      render(this.#popup, document.querySelector('.footer'),
-        RenderPosition.AFTEREND);
       document.body.classList.add('hide-overflow');
-      this.#popup.setCloseClickHandler(this.hideFilmPopup);
-      document.body.appendChild(this.#popup.element);
 
+      // if (oldFilmView === null) {
+      //   render(this.#popup, document.body);
+      //   return;
+      // }
+
+      // if (this.#container.contains(oldFilmView.element)) {
+      //   replace(this.#popup, oldFilmView);
+      // }
+
+      // remove(oldFilmView);
+
+      render(this.#popup, document.body);
       this.#popup.setFavoriteClickHandler(this.#handleFavoriteClick);
       this.#popup.setArchiveClickHandler(this.#handleArchiveClick);
+      this.#popup.setWatchListClickHandler(this.#handleWatchListClick);
+      this.#popup.setCloseClickHandler(this.#hideFilmPopup);
       window.addEventListener('keydown', this.#onWindowKeydown);
-
+      this.#mode = Mode.OPEN;
     }
-
   };
 
-  resetView = () => {
-    this.hideFilmPopup();
+  #updateDetailsComponent = () => {
+    if(this.#mode === Mode.OPEN) {
+      this.resetDetailsView();
+      // this.#renderFilmPopup(); //Если я просто перерендериваю выскакиевает ошибка, хотя данные меняются
+    }
   };
 
-  hideFilmPopup = () => {
-    if (this.#isPopupOpen) {
-      remove(this.#popup);
-      this.#mode = Mode.DEFAULT;
-      console.log(this.#mode);
-      this.#popup = null;
-      document.body.classList.remove('hide-overflow');
-      window.removeEventListener('keydown', this.#onWindowKeydown);
+  resetDetailsView = () => {
+    if(this.#mode === Mode.OPEN) {
+      this.#hideFilmPopup();
+      //Тут мне кажетя должен быть replace, но у меня не получается его добавить.
     }
+  };
+
+  #hideFilmPopup = () => {
+    remove(this.#popup);
+    this.#mode = Mode.DEFAULT;
+    this.#popup = null;
+    document.body.classList.remove('hide-overflow');
+    window.removeEventListener('keydown', this.#onWindowKeydown);
+
   };
 
   #onWindowKeydown = (evt) => {
     if (isEscapeKey(evt)) {
       evt.preventDefault();
-      this.hideFilmPopup();
+      this.#hideFilmPopup();
     }
+  };
+
+  #handleWatchListClick = () => {
+    this.#changeData({...this.#film, userDetails: {...this.#film.userDetails, watchlist: !this.#film.userDetails.watchlist}});
+    this.#updateDetailsComponent();
+  };
+
+  #handleFavoriteClick = () => {
+    this.#changeData({...this.#film, userDetails: {...this.#film.userDetails, favorite: !this.#film.userDetails.favorite}});
+    this.#updateDetailsComponent();
+  };
+
+  #handleArchiveClick = () => {
+    this.#changeData({...this.#film, userDetails: {...this.#film.userDetails, alreadyWatched: !this.#film.userDetails.alreadyWatched}});
+    this.#updateDetailsComponent();
   };
 }
