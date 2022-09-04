@@ -61,7 +61,7 @@ export default class FilmPresenter {
 
   #renderFilmPopup = (film, comments) => {
     if (this.#mode === Mode.DEFAULT) {
-      this.#resetDetailsView();
+      this.#resetView();
       this.#updatePopup(film, comments);
       render(this.#popup, document.body);
       this.#mode = Mode.OPEN;
@@ -77,7 +77,7 @@ export default class FilmPresenter {
     }
   };
 
-  #resetDetailsView = () => {
+  resetDetailsView = () => {
     if(this.#mode === Mode.OPEN) {
       this.#hideFilmPopup();
     }
