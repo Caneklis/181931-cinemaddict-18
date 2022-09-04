@@ -43,16 +43,15 @@ export default class FilmPresenter {
 
     if (this.#container.contains(oldFilmView.element)) {
       replace(this.#filmCardView, oldFilmView);
-      this.#replaceFilmPopup(film, comments);
     }
+
+    this.#replaceFilmPopup(film, comments);
 
     remove(oldFilmView);
   }
 
   #updatePopup = (film, comments) => {
     this.#popup = new PopupView(film, comments);
-    document.body.classList.add('hide-overflow');
-    window.addEventListener('keydown', this.#onWindowKeydown);
     this.#popup.setFavoriteClickHandler(this.#handleFavoriteClick);
     this.#popup.setArchiveClickHandler(this.#handleArchiveClick);
     this.#popup.setWatchListClickHandler(this.#handleWatchListClick);
@@ -62,6 +61,8 @@ export default class FilmPresenter {
   #renderFilmPopup = (film, comments) => {
     if (this.#mode === Mode.DEFAULT) {
       this.#resetView();
+      window.addEventListener('keydown', this.#onWindowKeydown);
+      document.body.classList.add('hide-overflow');
       this.#updatePopup(film, comments);
       render(this.#popup, document.body);
       this.#mode = Mode.OPEN;

@@ -21,8 +21,9 @@ export default class FilmsListPresenter {
   #films = null;
   #loadMoreButtonComponent = null;
   #filmPresenter = new Map();
+  #resetView = null;
 
-  constructor({ title = '', hiddenTitle = false, extra, container }) {
+  constructor({ title = '', hiddenTitle = false, extra, container }, resetView) {
     this.#container = container;
     this.#filmsEmptyListView = new FilmsEmptyListView();
     this.#filmsListView = new FilmsListView(
@@ -30,6 +31,7 @@ export default class FilmsListPresenter {
       hiddenTitle,
       extra
     );
+    this.#resetView = resetView;
   }
 
   filmsComponent = new FilmsView();
@@ -71,7 +73,7 @@ export default class FilmsListPresenter {
   };
 
   #createFilm = (film) => {
-    const filmPresenter = new FilmPresenter(this.filmsListContainerView.element, this.#handleCardChange, this.#handleResetDetail);
+    const filmPresenter = new FilmPresenter(this.filmsListContainerView.element, this.#handleCardChange, this.#resetView);
     filmPresenter.init(film, [...this.#commentsModel.get(film)]);
     this.#filmPresenter.set(film.id, filmPresenter);
   };
@@ -101,7 +103,7 @@ export default class FilmsListPresenter {
     this.#filmPresenter.get(updatedTask.id).init(updatedTask, [...this.#commentsModel.get(updatedTask)]);
   };
 
-  #handleResetDetail = () => {
+  handleResetDetail = () => {
     this.#filmPresenter.forEach((presenter) => presenter.resetDetailsView());
   };
 }
