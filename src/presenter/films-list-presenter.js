@@ -2,9 +2,10 @@ import FilmsView from '../view/films-view.js';
 import FilmsListView from '../view/films-list-view.js';
 import FilmsEmptyListView from '../view/films-list-empty.js';
 import FilmsListContainerView from '../view/films-list-container-view.js';
-import { render } from '../framework/render.js';
+import { render, remove } from '../framework/render.js';
 import FilmPresenter from './film-presenter.js';
 import LoadMoreButtonView from '../view/load-more-button-view.js';
+import { updateItem } from '../utils/common.js';
 
 const FILMS_COUNT_PER_STEP = 5;
 export default class FilmsListPresenter {
@@ -19,8 +20,10 @@ export default class FilmsListPresenter {
   #commentsModel = null;
   #films = null;
   #loadMoreButtonComponent = null;
+  #filmPresenter = new Map();
+  #resetView = null;
 
-  constructor({ title = '', hiddenTitle = false, extra, container }) {
+  constructor({ title = '', hiddenTitle = false, extra, container }, resetView) {
     this.#container = container;
     this.#filmsEmptyListView = new FilmsEmptyListView();
     this.#filmsListView = new FilmsListView(
@@ -28,6 +31,7 @@ export default class FilmsListPresenter {
       hiddenTitle,
       extra
     );
+    this.#resetView = resetView;
   }
 
   filmsComponent = new FilmsView();
@@ -39,11 +43,9 @@ export default class FilmsListPresenter {
 
   #renderedFilmCount = FILMS_COUNT_PER_STEP;
 
-
   init = (filmsModel, commentsModel) => {
     this.#filmsModel = filmsModel;
     this.#commentsModel = commentsModel;
-
 
     this.#films = this.prepearFilms([...this.#filmsModel.get()]);
 
@@ -54,6 +56,11 @@ export default class FilmsListPresenter {
       this.#filmsListView.element
     );
 
+    this.#renderAllFilms();
+  };
+
+
+  #renderAllFilms = () => {
     this.#films.slice(0, 5).forEach((film) => {
       this.#createFilm(film);
     });
@@ -63,13 +70,12 @@ export default class FilmsListPresenter {
       render(this.#loadMoreButtonComponent, this.#filmsListView.element);
       this.#loadMoreButtonComponent.setClickHandler(this.#handleLoadMoreButtonClick);
     }
-
-
   };
 
   #createFilm = (film) => {
-    const filmPresenter = new FilmPresenter(this.filmsListContainerView.element);
+    const filmPresenter = new FilmPresenter(this.filmsListContainerView.element, this.#handleCardChange, this.#resetView);
     filmPresenter.init(film, [...this.#commentsModel.get(film)]);
+    this.#filmPresenter.set(film.id, filmPresenter);
   };
 
   #handleLoadMoreButtonClick = () => {
@@ -83,5 +89,21 @@ export default class FilmsListPresenter {
       this.#loadMoreButtonComponent.element.remove();
       this.#loadMoreButtonComponent.removeElement();
     }
+  };
+
+  #clearFilmsList = () => {
+    this.#filmPresenter.forEach((presenter) => presenter.destroy());
+    this.#filmPresenter.clear();
+    this.#renderedFilmCount = FILMS_COUNT_PER_STEP;
+    remove(this.#loadMoreButtonComponent);
+  };
+
+  #handleCardChange = (updatedTask) => {
+    this.#films = updateItem(this.#films, updatedTask);
+    this.#filmPresenter.get(updatedTask.id).init(updatedTask, [...this.#commentsModel.get(updatedTask)]);
+  };
+
+  handleResetDetail = () => {
+    this.#filmPresenter.forEach((presenter) => presenter.resetDetailsView());
   };
 }
