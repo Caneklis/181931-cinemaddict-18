@@ -71,7 +71,7 @@ export default class FilmsListPresenter {
   };
 
   #createFilm = (film) => {
-    const filmPresenter = new FilmPresenter(this.filmsListContainerView.element, this.#handleCardChange, this.#handleModeChange, this.#handleResetDetail);
+    const filmPresenter = new FilmPresenter(this.filmsListContainerView.element, this.#handleCardChange, this.#handleResetDetail);
     filmPresenter.init(film, [...this.#commentsModel.get(film)]);
     this.#filmPresenter.set(film.id, filmPresenter);
   };
@@ -87,10 +87,6 @@ export default class FilmsListPresenter {
       this.#loadMoreButtonComponent.element.remove();
       this.#loadMoreButtonComponent.removeElement();
     }
-  };
-
-  #handleModeChange = () => {
-    this.#filmPresenter.forEach((presenter) => presenter.resetView());
   };
 
   #clearFilmsList = () => {

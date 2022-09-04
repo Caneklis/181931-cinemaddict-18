@@ -14,14 +14,12 @@ export default class FilmPresenter {
   #changeData = null;
   #film = null;
   #isPopupOpen = false;
-  #changeMode = null;
   #resetView = null;
   #mode = Mode.DEFAULT;
 
-  constructor(container, changeData, changeMode, resetView) {
+  constructor(container, changeData, resetView) {
     this.#container = container;
     this.#changeData = changeData;
-    this.#changeMode = changeMode;
     this.#resetView = resetView;
   }
 
@@ -45,52 +43,43 @@ export default class FilmPresenter {
 
     if (this.#container.contains(oldFilmView.element)) {
       replace(this.#filmCardView, oldFilmView);
+      this.#replaceFilmPopup(film, comments);
     }
 
     remove(oldFilmView);
   }
 
-  #renderFilmPopup = (film,comments) => {
-    if(this.#mode === Mode.DEFAULT) {
-      this.#resetView();
-      //Тут я хотел сделать, как выше с карточкой, но тоже не вышло
-      // const oldFilmView = this.#popup;
+  #updatePopup = (film, comments) => {
+    this.#popup = new PopupView(film, comments);
+    document.body.classList.add('hide-overflow');
+    window.addEventListener('keydown', this.#onWindowKeydown);
+    this.#popup.setFavoriteClickHandler(this.#handleFavoriteClick);
+    this.#popup.setArchiveClickHandler(this.#handleArchiveClick);
+    this.#popup.setWatchListClickHandler(this.#handleWatchListClick);
+    this.#popup.setCloseClickHandler(this.#hideFilmPopup);
+  };
 
-      this.#popup = new PopupView(film, comments);
-      document.body.classList.add('hide-overflow');
-
-      // if (oldFilmView === null) {
-      //   render(this.#popup, document.body);
-      //   return;
-      // }
-
-      // if (this.#container.contains(oldFilmView.element)) {
-      //   replace(this.#popup, oldFilmView);
-      // }
-
-      // remove(oldFilmView);
-
+  #renderFilmPopup = (film, comments) => {
+    if (this.#mode === Mode.DEFAULT) {
+      this.#resetDetailsView();
+      this.#updatePopup(film, comments);
       render(this.#popup, document.body);
-      this.#popup.setFavoriteClickHandler(this.#handleFavoriteClick);
-      this.#popup.setArchiveClickHandler(this.#handleArchiveClick);
-      this.#popup.setWatchListClickHandler(this.#handleWatchListClick);
-      this.#popup.setCloseClickHandler(this.#hideFilmPopup);
-      window.addEventListener('keydown', this.#onWindowKeydown);
       this.#mode = Mode.OPEN;
     }
   };
 
-  #updateDetailsComponent = () => {
-    if(this.#mode === Mode.OPEN) {
-      this.resetDetailsView();
-      // this.#renderFilmPopup(); //Если я просто перерендериваю выскакиевает ошибка, хотя данные меняются
+  #replaceFilmPopup = (film, comments) => {
+    if (this.#mode === Mode.OPEN) {
+      const oldPopup = this.#popup;
+      this.#updatePopup(film, comments);
+      replace(this.#popup, oldPopup);
+      remove(oldPopup);
     }
   };
 
-  resetDetailsView = () => {
+  #resetDetailsView = () => {
     if(this.#mode === Mode.OPEN) {
       this.#hideFilmPopup();
-      //Тут мне кажетя должен быть replace, но у меня не получается его добавить.
     }
   };
 
@@ -100,7 +89,6 @@ export default class FilmPresenter {
     this.#popup = null;
     document.body.classList.remove('hide-overflow');
     window.removeEventListener('keydown', this.#onWindowKeydown);
-
   };
 
   #onWindowKeydown = (evt) => {
@@ -112,16 +100,13 @@ export default class FilmPresenter {
 
   #handleWatchListClick = () => {
     this.#changeData({...this.#film, userDetails: {...this.#film.userDetails, watchlist: !this.#film.userDetails.watchlist}});
-    this.#updateDetailsComponent();
   };
 
   #handleFavoriteClick = () => {
     this.#changeData({...this.#film, userDetails: {...this.#film.userDetails, favorite: !this.#film.userDetails.favorite}});
-    this.#updateDetailsComponent();
   };
 
   #handleArchiveClick = () => {
     this.#changeData({...this.#film, userDetails: {...this.#film.userDetails, alreadyWatched: !this.#film.userDetails.alreadyWatched}});
-    this.#updateDetailsComponent();
   };
 }
