@@ -11,4 +11,11 @@ const filterTypeToText = {
   [FilterType.HISTORY]: 'History',
   [FilterType.FAVORITES]: 'Favorites'
 };
-export {FilterType, filterTypeToText};
+
+const SortType = {
+  DEFAULT: 'default',
+  DATE_DOWN: 'date-down',
+  RATING: 'raiting',
+};
+
+export {FilterType, filterTypeToText, SortType};
