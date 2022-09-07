@@ -2,10 +2,18 @@ import FilmsView from '../view/films-view.js';
 import FilmsListView from '../view/films-list-view.js';
 import FilmsEmptyListView from '../view/films-list-empty.js';
 import FilmsListContainerView from '../view/films-list-container-view.js';
-import { render, remove } from '../framework/render.js';
+import { render, remove, RenderPosition } from '../framework/render.js';
 import FilmPresenter from './film-presenter.js';
 import LoadMoreButtonView from '../view/load-more-button-view.js';
 import { updateItem } from '../utils/common.js';
+
+import { generateFilter } from '../mock/filter.js';
+
+import NavigationView from '../view/navigation-view.js';
+import SortView from '../view/sort-view.js';
+
+import {sortByDateDown, sortByRatingDown} from '../utils/sort.js';
+import { SortType } from '../const.js';
 
 const FILMS_COUNT_PER_STEP = 5;
 export default class FilmsListPresenter {
@@ -22,6 +30,10 @@ export default class FilmsListPresenter {
   #loadMoreButtonComponent = null;
   #filmPresenter = new Map();
   #resetView = null;
+
+  #sortComponent = new SortView();
+  #currentSortType = SortType.DEFAULT;
+  #sourcedFilms = [];
 
   constructor({ title = '', hiddenTitle = false, extra, container }, resetView) {
     this.#container = container;
@@ -40,7 +52,6 @@ export default class FilmsListPresenter {
 
   prepearFilms = (films) => films;
 
-
   #renderedFilmCount = FILMS_COUNT_PER_STEP;
 
   init = (filmsModel, commentsModel) => {
@@ -48,6 +59,13 @@ export default class FilmsListPresenter {
     this.#commentsModel = commentsModel;
 
     this.#films = this.prepearFilms([...this.#filmsModel.get()]);
+
+    this.#sourcedFilms = [...this.#films];
+
+    if (this.#films.length > 2) {
+      this.#renderNavigation(this.#filmsModel);
+      this.#renderSort();
+    }
 
     render(this.#filmsListView, this.#container.element);
 
@@ -91,16 +109,54 @@ export default class FilmsListPresenter {
     }
   };
 
+  #renderNavigation = (filmsModel) => {
+    const filters = generateFilter(filmsModel.get());
+
+    render(new NavigationView(filters),
+      this.#container.element,
+      RenderPosition.BEFOREBEGIN);
+  };
+
+  #sortFilms = (sortType) => {
+    switch (sortType) {
+      case SortType.DATE_UP:
+        this.#films.sort(sortByDateDown);
+        break;
+      case SortType.RATING:
+        this.#films.sort(sortByRatingDown);
+        break;
+      default:
+        this.#films = [...this.#sourcedFilms];
+    }
+
+    this.#currentSortType = sortType;
+  };
+
+  #handleSortTypeChange = (sortType) => {
+    if (this.#currentSortType === sortType) {
+      return;
+    }
+
+    this.#sortFilms(sortType);
+    this.#clearFilmsList();
+  };
+
+  #renderSort = ()=> {
+    render(this.#sortComponent, this.#container.element, RenderPosition.BEFOREBEGIN);
+    this.#sortComponent.setSortTypeChangeHandler(this.#handleSortTypeChange);
+  };
+
   #clearFilmsList = () => {
     this.#filmPresenter.forEach((presenter) => presenter.destroy());
     this.#filmPresenter.clear();
-    this.#renderedFilmCount = FILMS_COUNT_PER_STEP;
     remove(this.#loadMoreButtonComponent);
+    this.#renderAllFilms();
   };
 
-  #handleCardChange = (updatedTask) => {
-    this.#films = updateItem(this.#films, updatedTask);
-    this.#filmPresenter.get(updatedTask.id).init(updatedTask, [...this.#commentsModel.get(updatedTask)]);
+  #handleCardChange = (updatedFilm) => {
+    this.#films = updateItem(this.#films, updatedFilm);
+    this.#sourcedFilms = updateItem(this.#sourcedFilms, updatedFilm);
+    this.#filmPresenter.get(updatedFilm.id).init(updatedFilm, [...this.#commentsModel.get(updatedFilm)]);
   };
 
   handleResetDetail = () => {

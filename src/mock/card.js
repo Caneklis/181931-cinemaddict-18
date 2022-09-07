@@ -1,5 +1,6 @@
 import { getRandomInteger } from '../utils/common.js';
 import { nanoid } from 'nanoid';
+import dayjs from 'dayjs';
 
 const FILMS_COUNT = 20;
 
@@ -31,6 +32,26 @@ const generatePoster = () => {
   return descriptions[randomIndex];
 };
 
+const generateDate = () => {
+  const isDate = Boolean(getRandomInteger(0, 1));
+
+  if (!isDate) {
+    return null;
+  }
+
+  const years = [
+    '2019-04-12T16:12:32.554Z',
+    '2018-04-12T16:12:32.554Z',
+    '2017-04-12T16:12:32.554Z',
+    '2020-04-12T16:12:32.554Z',
+    '2022-04-12T16:12:32.554Z'
+  ];
+
+  const randomIndex = getRandomInteger(0, years.length - 1);
+
+  return years[randomIndex];
+};
+
 const generateCard = () => ({
   filmInfo: {
     title: generateDescription(),
@@ -47,7 +68,7 @@ const generateCard = () => ({
       'Dan Duryea',
     ],
     release: {
-      date: '2019-05-11T00:00:00.000Z',
+      date: generateDate(),
       releaseCountry: 'Finland',
     },
     runtime: getRandomInteger(60, 180),

@@ -92,6 +92,11 @@ export default class FilmPresenter {
     window.removeEventListener('keydown', this.#onWindowKeydown);
   };
 
+  destroy = () => {
+    remove(this.#filmCardView);
+    remove(this.#popup);
+  };
+
   #onWindowKeydown = (evt) => {
     if (isEscapeKey(evt)) {
       evt.preventDefault();
