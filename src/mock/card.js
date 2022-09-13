@@ -1,6 +1,5 @@
 import { getRandomInteger } from '../utils/common.js';
 import { nanoid } from 'nanoid';
-import dayjs from 'dayjs';
 
 const FILMS_COUNT = 20;
 

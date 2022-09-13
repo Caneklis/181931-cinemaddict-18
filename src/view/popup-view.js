@@ -200,7 +200,6 @@ export default class PopupView extends AbstractStatefulView {
   });
 
   get template() {
-    console.log(this._state);
     return createPopupTemplate(this._state);
   }
 
