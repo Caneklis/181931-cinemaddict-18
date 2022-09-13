@@ -1,4 +1,5 @@
 import { getRandomInteger } from '../utils/common.js';
+import { emotions } from '../const.js';
 
 const generateDescription = () => {
   const descriptions = [
@@ -15,10 +16,9 @@ const generateDescription = () => {
 };
 
 const generateEmojy = () => {
-  const emoji = ['smile', 'sleeping', 'puke', 'angry'];
-  const randomIndex = getRandomInteger(0, emoji.length - 1);
+  const randomIndex = getRandomInteger(0, emotions.length - 1);
 
-  return emoji[randomIndex];
+  return emotions[randomIndex];
 };
 
 const generateComment = () => ({
@@ -28,9 +28,7 @@ const generateComment = () => ({
   emotion: generateEmojy(),
 });
 
-const getCommentCount = (films) => {
-  films.reduce((count, film)=>count + film.comments.length, 0);
-};
+const getCommentCount = (films) => films.reduce((count, film)=>count + film.comments.length, 0);
 
 const generateComments = (films) => {
   const commentCount = getCommentCount(films);

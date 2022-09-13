@@ -9,7 +9,7 @@ export default class CommentsModel {
 
   constructor(filmsModel) {
     this.#filmsModel = filmsModel;
-    // this.#generateAllComments();
+    this.#generateAllComments();
 
   }
 

@@ -7,7 +7,7 @@ import CommentsModel from './model/comments-model.js';
 const siteMainHeader = document.querySelector('.header');
 const siteMainElement = document.querySelector('.main');
 const filmsModel = new FilmsModel();
-const commentsModel = new CommentsModel();
+const commentsModel = new CommentsModel(filmsModel);
 
 render(new ProfileView(), siteMainHeader);
 
