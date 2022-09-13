@@ -18,4 +18,6 @@ const SortType = {
   RATING: 'raiting',
 };
 
-export {FilterType, filterTypeToText, SortType};
+const emotions = ['smile', 'sleeping', 'puke', 'angry'];
+
+export {FilterType, filterTypeToText, SortType, emotions};
