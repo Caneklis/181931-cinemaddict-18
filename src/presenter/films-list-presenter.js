@@ -38,6 +38,9 @@ export default class FilmsListPresenter {
 
   #sortComponent = new SortView();
   #currentSortType = SortType.DEFAULT;
+
+  // #sortComponent = null;
+  // #loadMoreButtonComponent = null;
   // #sourcedFilms = [];
 
   constructor({ title = '', hiddenTitle = false, extra, container }, resetView, filmsModel) {
@@ -52,8 +55,8 @@ export default class FilmsListPresenter {
     this.#filmsModel = filmsModel;
     this.#filterModel = filmsModel;
 
-    this.#filmsModel.addObserver(this.#handleModelEvent);
-    this.#filterModel.addObserver(this.#handleModelEvent);
+    // this.#filmsModel.addObserver(this.#handleModelEvent);
+    // this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
   filmsComponent = new FilmsView();
