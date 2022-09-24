@@ -20,4 +20,18 @@ export default class CommentsModel {
 
     return this.#comments;
   };
+
+  add = (updateType, update) => {
+    this.#allComments.push(update);
+    this._notify(updateType, update);
+  };
+
+  delete = (updateType, update) => {
+    const index = this.#allComments.findIndex((comment) => comment.id === update.id);
+    if (index === -1) {
+      throw new Error('Can\'t update unexisting comment');
+    }
+    this.#allComments = [...this.#allComments.slice(0, index), ...this.#allComments(index + 1)];
+    this._notify(updateType);
+  };
 }

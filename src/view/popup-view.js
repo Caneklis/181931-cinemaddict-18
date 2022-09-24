@@ -51,7 +51,7 @@ const createPopupTemplate = ({film, comments, message, emotionSelect}) => {
 
   const createComment = (comment) => {
 
-    const { author, comment: text, emotion: commentEmotion } = comment;
+    const { author, comment: text, emotion: commentEmotion, date: commentDate } = comment;
 
     return `<li class="film-details__comment">
               <span class="film-details__comment-emoji">
@@ -61,10 +61,7 @@ const createPopupTemplate = ({film, comments, message, emotionSelect}) => {
                 <p class="film-details__comment-text">${text}</p>
                 <p class="film-details__comment-info">
                   <span class="film-details__comment-author">${author}</span>
-                  <span class="film-details__comment-day">${formatDate(
-    date,
-    'D/MMMM/YYYY HH:mm'
-  )}</span>
+                  <span class="film-details__comment-day">${formatDate( date, commentDate)}</span>
                   <button class="film-details__comment-delete">Delete</button>
                 </p>
               </div>
@@ -113,10 +110,7 @@ const createPopupTemplate = ({film, comments, message, emotionSelect}) => {
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Release Date</td>
-              <td class="film-details__cell">${formatDate(
-    date,
-    'D MMMM YYYY'
-  )}</td>
+              <td class="film-details__cell">${formatDate(date, 'D MMMM YYYY')}</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Runtime</td>
@@ -166,9 +160,7 @@ const createPopupTemplate = ({film, comments, message, emotionSelect}) => {
 
 
         <form class="film-details__new-comment" action="" method="get">
-          <div class="film-details__add-emoji-label">
-            <div class="film-details__add-emoji-label">${createSmile(emotionSelect)}</div>
-          </div>
+          <div class="film-details__add-emoji-label">${createSmile(emotionSelect)}</div>
 
           <label class="film-details__comment-label">
             <textarea class="film-details__comment-input" name="comment" placeholder="Select reaction below and write comment here">${message ? message : ''}</textarea>
