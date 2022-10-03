@@ -38,7 +38,7 @@ export default class FilmsPresenter {
         container: this.#filmView,
         resetView: this.#handleResetDetail,
         filmsModel: this.#filmsModel,
-        filterModel: this.#filmsModel
+        filterModel: this.#filterModel
       });
       this.filmsListPresenters.set('main-presenter', filmsMainPresenter);
 
@@ -48,7 +48,7 @@ export default class FilmsPresenter {
         container: this.#filmView,
         resetView: this.#handleResetDetail,
         filmsModel: this.#filmsModel,
-        filterModel: this.#filmsModel
+        filterModel: this.#filterModel
       });
       this.filmsListPresenters.set('top-presenter', filmsTopPresenter);
       filmsTopPresenter.init(this.#filmsModel, this.#commentsModel,
@@ -59,7 +59,7 @@ export default class FilmsPresenter {
         container: this.#filmView,
         resetView: this.#handleResetDetail,
         filmsModel: this.#filmsModel,
-        filterModel: this.#filmsModel
+        filterModel: this.#filterModel
       });
       this.filmsListPresenters.set('most-view-presenter', filmsMostCommentedPresenter);
       filmsMostCommentedPresenter.init(this.#filmsModel, this.#commentsModel,

@@ -55,9 +55,10 @@ export default class FilmsListPresenter {
 
   get films() {
     this.#filterType = this.#filterModel.filter;
+    console.log(this.#filterType);
     const films = this.prepearFilms([...this.#filmsModel.get()]);
+    console.log(films);
     const filteredFilms = filter[this.#filterType](films);
-    // const filteredFilms = [...films];
 
     switch (this.#currentSortType) {
       case SortType.DATE_DOWN:

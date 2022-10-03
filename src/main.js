@@ -18,7 +18,7 @@ render(new ProfileView(), siteMainHeader);
 
 const filmsPresenter = new FilmsPresenter(siteMainElement, filmsModel, commentsModel, filterModel);
 
-const filterPresenter = new FilterPresenter(siteMainElement, filterModel, filmsModel);
+const filterPresenter = new FilterPresenter(siteMainElement, filmsModel, filterModel);
 
 filmsPresenter.init();
 filterPresenter.init();
