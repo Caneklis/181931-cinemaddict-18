@@ -8,7 +8,7 @@ import LoadMoreButtonView from '../view/load-more-button-view.js';
 import SortView from '../view/sort-view.js';
 import {sortByDateDown, sortByRatingDown} from '../utils/sort.js';
 import { SortType, UserAction, UpdateType } from '../const.js';
-import {filter, FilterType } from '../utils/filter.js';
+import {filter } from '../utils/filter.js';
 
 const FILMS_COUNT_PER_STEP = 5;
 export default class FilmsListPresenter {
@@ -26,6 +26,11 @@ export default class FilmsListPresenter {
   #navigationComponent = null;
   #renderedFilmCount = 0;
   #openPopup = null;
+
+  #comments = null;
+  #film = null;
+
+  #changeData = null;
 
   constructor({ extra, container, title = '', hiddenTitle = false, resetView, filmsModel = null, filterModel = null }) {
     this.#container = container;
@@ -72,7 +77,7 @@ export default class FilmsListPresenter {
         this.#commentsModel.add(updateType, update);
         break;
       case UserAction.DELETE_COMMENT:
-        this.#filmsModel.update(updateType, update.film);
+        this.#filmsModel.update(updateType, update);
         this.#commentsModel.delete(updateType, update);
         break;
     }
@@ -81,7 +86,7 @@ export default class FilmsListPresenter {
   #handleModelEvent = (updateType, data) => {
     switch (updateType) {
       case UpdateType.PATCH:
-        this.#filmPresenter.get(data.id).init(data, this.#commentsModel.getComments(data.id));
+        this.#filmPresenter.get(data.id).init(data, this.#commentsModel.get(data.id));
         break;
       case UpdateType.MINOR:
         this.#clearFilmsList();
@@ -183,7 +188,6 @@ export default class FilmsListPresenter {
   #handleLoadMoreButtonClick = () => {
     const taskCount = this.films.length;
     const newRenderedTaskCount = Math.min(taskCount, this.#renderedFilmCount + FILMS_COUNT_PER_STEP);
-    console.log(taskCount, this.#renderedFilmCount, newRenderedTaskCount);
     const tasks = this.films.slice(this.#renderedFilmCount, newRenderedTaskCount);
 
     tasks.forEach((card) => this.#createFilm(card));
@@ -211,6 +215,7 @@ export default class FilmsListPresenter {
   };
 
   handleResetDetail = () => {
+    this.#openPopup = null;
     this.#filmPresenter.forEach((presenter) => presenter.resetDetailsView());
   };
 }

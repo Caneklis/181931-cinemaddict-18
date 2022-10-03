@@ -54,7 +54,7 @@ const createPopupTemplate = ({film, comments, message, emotionSelect}) => {
 
   const createComment = (comment) => {
 
-    const { author, comment: text, emotion: commentEmotion, date: commentDate } = comment;
+    const {id, author, comment: text, emotion: commentEmotion, date: commentDate } = comment;
 
     return `<li class="film-details__comment">
               <span class="film-details__comment-emoji">
@@ -65,7 +65,7 @@ const createPopupTemplate = ({film, comments, message, emotionSelect}) => {
                 <p class="film-details__comment-info">
                   <span class="film-details__comment-author">${author}</span>
                   <span class="film-details__comment-day">${formatDate(commentDate, 'D MMMM YYYY')}</span>
-                  <button class="film-details__comment-delete">Delete</button>
+                  <button class="film-details__comment-delete" data-id="${id}">Delete</button>
                 </p>
               </div>
             </li>
@@ -180,10 +180,15 @@ const createPopupTemplate = ({film, comments, message, emotionSelect}) => {
 export default class PopupView extends AbstractStatefulView {
   #changeData = null;
 
-  constructor(film, comments) {
+  #comment = null;
+  #filmId = null;
+
+  constructor(film, comments, comment, filmId) {
     super();
     this._state = PopupView.parseFilmToState(film, comments);
     this.#setInnerHandlers();
+    this.#comment = comment;
+    this.#filmId = filmId;
   }
 
   static parseFilmToState = (film,comments) => ({
@@ -213,7 +218,7 @@ export default class PopupView extends AbstractStatefulView {
     this.element.addEventListener('scroll', this.#positionScrollHandler);
 
     if (this.element.querySelector('.film-details__comments-list')) {
-      this.element.querySelector('.film-details__comments-list').addEventListener('click', this.#deleteCommentHandler);
+      this.element.querySelector('.film-details__comments-list').addEventListener('click', this.#handleDeleteCommentClick);
     }
 
   };
@@ -243,6 +248,13 @@ export default class PopupView extends AbstractStatefulView {
     this.element.querySelector('.film-details__control-button--watched').addEventListener('click', this.#archiveClickHandler);
   };
 
+  setDeleteCommentHandler = (callback) => {
+    this._callback.deleteButtonClick = callback;
+    this.element
+      .querySelector('.film-details__comment-delete')
+      .addEventListener('click', this.#handleDeleteCommentClick);
+  };
+
   #watchlistClickHandler = (evt) => {
     evt.preventDefault();
     this._callback.watchlistClick();
@@ -261,6 +273,11 @@ export default class PopupView extends AbstractStatefulView {
   #favoriteClickHandler = (evt) => {
     evt.preventDefault();
     this._callback.favoriteClick();
+  };
+
+  #handleDeleteCommentClick = (evt) => {
+    evt.preventDefault();
+    this._callback.deleteButtonClick(this.#comment, this.#filmId);
   };
 
 
@@ -291,15 +308,5 @@ export default class PopupView extends AbstractStatefulView {
     });
   };
 
-  setDeleteCommentHandler = (callback) => {
-    this._callback.deleteComment = callback;
-  };
 
-  #deleteCommentHandler = (evt) => {
-    if (evt.target.tagName !== 'BUTTON') {
-      return;
-    }
-    evt.preventDefault();
-    this._callback.deleteComment(Number(evt.target.dataset.id));
-  };
 }

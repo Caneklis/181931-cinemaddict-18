@@ -135,14 +135,11 @@ export default class FilmPresenter {
     );
   };
 
-  #handleDeleteCommentClick = (id) => {
-    const index = this.#film.comments.findIndex((commentId) => id === commentId);
-    this.#film.comments.splice(index, 1);
-    const movie = this.#film;
+  #handleDeleteCommentClick = ( comments ) => {
     this.#changeData(
       UserAction.DELETE_COMMENT,
       UpdateType.PATCH,
-      { id, movie }
+      {...this.#film, comments }
     );
   };
 }
