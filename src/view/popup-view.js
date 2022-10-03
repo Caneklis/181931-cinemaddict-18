@@ -217,7 +217,7 @@ export default class PopupView extends AbstractStatefulView {
     this.element.scrollTop = this._state.scroll;
     this.element.addEventListener('scroll', this.#positionScrollHandler);
 
-    if (this.element.querySelector('.film-details__comments-list')) {
+    if ( this.element.querySelector('.film-details__comment')) {
       this.element.querySelector('.film-details__comments-list').addEventListener('click', this.#handleDeleteCommentClick);
     }
 
@@ -250,9 +250,13 @@ export default class PopupView extends AbstractStatefulView {
 
   setDeleteCommentHandler = (callback) => {
     this._callback.deleteButtonClick = callback;
-    this.element
-      .querySelector('.film-details__comment-delete')
-      .addEventListener('click', this.#handleDeleteCommentClick);
+    if (this.element
+      .querySelector('.film-details__comment-delete')) {
+      this.element
+        .querySelector('.film-details__comment-delete')
+        .addEventListener('click', this.#handleDeleteCommentClick);
+    }
+
   };
 
   #watchlistClickHandler = (evt) => {
