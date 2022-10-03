@@ -36,22 +36,35 @@ export default class FilmsPresenter {
 
       const filmsMainPresenter = new FilmsListAllPresenter({
         container: this.#filmView,
-      }, this.#handleResetDetail);
+        resetView: this.#handleResetDetail,
+        filmsModel: this.#filmsModel,
+        filterModel: this.#filmsModel
+      });
       this.filmsListPresenters.set('main-presenter', filmsMainPresenter);
 
       filmsMainPresenter.init(this.#filmsModel, this.#commentsModel, this.#filterModel);
 
       const filmsTopPresenter = new FilmsListRatedPresenter({
         container: this.#filmView,
-      }, this.#handleResetDetail);
+        resetView: this.#handleResetDetail,
+        filmsModel: this.#filmsModel,
+        filterModel: this.#filmsModel
+      });
       this.filmsListPresenters.set('top-presenter', filmsTopPresenter);
-      filmsTopPresenter.init(this.#filmsModel, this.#commentsModel, this.#filterModel);
+      filmsTopPresenter.init(this.#filmsModel, this.#commentsModel,
+        this.#filterModel
+      );
 
       const filmsMostCommentedPresenter = new FilmsListMostCommentedPresenter({
         container: this.#filmView,
-      }, this.#handleResetDetail);
+        resetView: this.#handleResetDetail,
+        filmsModel: this.#filmsModel,
+        filterModel: this.#filmsModel
+      });
       this.filmsListPresenters.set('most-view-presenter', filmsMostCommentedPresenter);
-      filmsMostCommentedPresenter.init(this.#filmsModel, this.#commentsModel, this.#filterModel);
+      filmsMostCommentedPresenter.init(this.#filmsModel, this.#commentsModel,
+        this.#filterModel
+      );
     } else {
       const filmsEmptyPresenter = new FilmsEmptyListPresenter({
         container: this.#filmView,

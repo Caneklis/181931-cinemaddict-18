@@ -5,6 +5,7 @@ import {
   toggleFilmsControlClass,
 } from '../utils.js';
 import { emotions } from '../const.js';
+import dayjs from 'dayjs';
 
 const createSmile = (emotion) => emotion ? `<img src="./images/emoji/${emotion}.png" width="55" height="55" alt="emoji-smile">` : '';
 
@@ -49,6 +50,8 @@ const createPopupTemplate = ({film, comments, message, emotionSelect}) => {
       .map((genre) => `<span class="film-details__genre">${genre}</span>`)
       .join('\n');
 
+  const releaseDate = dayjs(date).format('D MMMM YYYY');
+
   const createComment = (comment) => {
 
     const { author, comment: text, emotion: commentEmotion, date: commentDate } = comment;
@@ -61,7 +64,7 @@ const createPopupTemplate = ({film, comments, message, emotionSelect}) => {
                 <p class="film-details__comment-text">${text}</p>
                 <p class="film-details__comment-info">
                   <span class="film-details__comment-author">${author}</span>
-                  <span class="film-details__comment-day">${formatDate( date, commentDate)}</span>
+                  <span class="film-details__comment-day">${formatDate(commentDate, 'D MMMM YYYY')}</span>
                   <button class="film-details__comment-delete">Delete</button>
                 </p>
               </div>
@@ -110,7 +113,7 @@ const createPopupTemplate = ({film, comments, message, emotionSelect}) => {
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Release Date</td>
-              <td class="film-details__cell">${formatDate(date, 'D MMMM YYYY')}</td>
+              <td class="film-details__cell">${releaseDate}</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Runtime</td>
@@ -208,6 +211,11 @@ export default class PopupView extends AbstractStatefulView {
     this.element.querySelector('.film-details__comment-input').addEventListener('input', this.#messageInputHandler);
     this.element.scrollTop = this._state.scroll;
     this.element.addEventListener('scroll', this.#positionScrollHandler);
+
+    if (this.element.querySelector('.film-details__comments-list')) {
+      this.element.querySelector('.film-details__comments-list').addEventListener('click', this.#deleteCommentHandler);
+    }
+
   };
 
   setCloseClickHandler = (callback) => {
@@ -281,5 +289,17 @@ export default class PopupView extends AbstractStatefulView {
     this._setState({
       message: evt.target.value
     });
+  };
+
+  setDeleteCommentHandler = (callback) => {
+    this._callback.deleteComment = callback;
+  };
+
+  #deleteCommentHandler = (evt) => {
+    if (evt.target.tagName !== 'BUTTON') {
+      return;
+    }
+    evt.preventDefault();
+    this._callback.deleteComment(Number(evt.target.dataset.id));
   };
 }

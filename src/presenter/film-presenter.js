@@ -2,6 +2,7 @@ import PopupView from '../view/popup-view.js';
 import { render, remove, replace } from '../framework/render.js';
 import FilmCardView from '../view/film-card-view.js';
 import { isEscapeKey } from '../utils/common.js';
+import { UserAction, UpdateType } from '../const.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -50,12 +51,15 @@ export default class FilmPresenter {
     remove(oldFilmView);
   }
 
+  #getUpdateType = (isChecked, isFiltered) => !isChecked && isFiltered ? UpdateType.MINOR : UpdateType.PATCH;
+
   #updatePopup = (film, comments) => {
     this.#popup = new PopupView(film, comments);
     this.#popup.setFavoriteClickHandler(this.#handleFavoriteClick);
     this.#popup.setArchiveClickHandler(this.#handleArchiveClick);
     this.#popup.setWatchListClickHandler(this.#handleWatchListClick);
     this.#popup.setCloseClickHandler(this.#hideFilmPopup);
+    this.#popup.setDeleteCommentHandler(this.#handleDeleteCommentClick);
   };
 
   #renderFilmPopup = (film, comments) => {
@@ -105,14 +109,37 @@ export default class FilmPresenter {
   };
 
   #handleWatchListClick = () => {
-    this.#changeData({...this.#film, userDetails: {...this.#film.userDetails, watchlist: !this.#film.userDetails.watchlist}});
+    this.#changeData(
+      UserAction.UPDATE_FILM,
+      UpdateType.MINOR,
+      {...this.#film, userDetails: {...this.#film.userDetails, watchlist: !this.#film.userDetails.watchlist}},
+    );
   };
 
   #handleFavoriteClick = () => {
-    this.#changeData({...this.#film, userDetails: {...this.#film.userDetails, favorite: !this.#film.userDetails.favorite}});
+    this.#changeData(
+      UserAction.UPDATE_FILM,
+      UpdateType.MINOR,
+      {...this.#film, userDetails: {...this.#film.userDetails, favorite: !this.#film.userDetails.favorite}},
+    );
   };
 
   #handleArchiveClick = () => {
-    this.#changeData({...this.#film, userDetails: {...this.#film.userDetails, alreadyWatched: !this.#film.userDetails.alreadyWatched}});
+    this.#changeData(
+      UserAction.UPDATE_FILM,
+      UpdateType.MINOR,
+      {...this.#film, userDetails: {...this.#film.userDetails, alreadyWatched: !this.#film.userDetails.alreadyWatched}},
+    );
+  };
+
+  #handleDeleteCommentClick = (id) => {
+    const index = this.#film.comments.findIndex((commentId) => id === commentId);
+    this.#film.comments.splice(index, 1);
+    const movie = this.#film;
+    this.#changeData(
+      UserAction.DELETE_COMMENT,
+      UpdateType.PATCH,
+      { id, movie }
+    );
   };
 }
