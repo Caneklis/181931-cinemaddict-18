@@ -8,5 +8,5 @@ export default class FilmsListMostCommentedPresenter extends FilmsListPresenter 
       extra: true, ...options});
   }
 
-  prepearFilms = (films) => films.splice(0, 2);
+  prepearFilms = (films) => films.slice(0, 2);
 }

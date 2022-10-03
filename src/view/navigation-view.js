@@ -3,7 +3,7 @@ import AbstractView from '../framework/view/abstract-view.js';
 const createFilterItemTemplate = (filter, currentFilterType) => {
   const {type, name, count} = filter;
   return (`
-<a href="#${type}" class="main-navigation__item
+<a href="#${type}" data-type="${type}" class="main-navigation__item
 ${ type === currentFilterType ? ' main-navigation__item--active' : ''}">
 ${name}
  <span class="main-navigation__item-count">${count}</span></a>`);};
@@ -39,6 +39,6 @@ export default class NavigationView extends AbstractView {
 
   #filterTypeChangeHandler = (evt) => {
     evt.preventDefault();
-    this._callback.filterTypeChange(evt.target.value);
+    this._callback.filterTypeChange(evt.target.dataset.type);
   };
 }

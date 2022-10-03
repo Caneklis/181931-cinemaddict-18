@@ -12,24 +12,19 @@ import {filter, FilterType } from '../utils/filter.js';
 
 const FILMS_COUNT_PER_STEP = 5;
 export default class FilmsListPresenter {
-  #title = null;
-  #hiddenTitle = null;
-  #extra = null;
   #container = null;
   #filmsListView = null;
   #filmsEmptyListView = null;
-  #filmsListContainerView = null;
   #filmsModel = null;
   #commentsModel = null;
   #loadMoreButtonComponent = null;
   #filmPresenter = new Map();
   #resetView = null;
   #filterModel = null;
-  #filterType = FilterType.ALL;
   #currentSortType = SortType.DEFAULT;
   #sortComponent = null;
   #navigationComponent = null;
-  #renderedFilmCount = FILMS_COUNT_PER_STEP;
+  #renderedFilmCount = 0;
 
   constructor({ extra, container, title = '', hiddenTitle = false, resetView, filmsModel = null, filterModel = null }) {
     this.#container = container;
@@ -47,18 +42,14 @@ export default class FilmsListPresenter {
     this.#filterModel?.addObserver(this.#handleModelEvent);
   }
 
-  filmsComponent = new FilmsView();
-
   filmsListContainerView = new FilmsListContainerView();
 
   prepearFilms = (films) => films;
 
   get films() {
-    this.#filterType = this.#filterModel.filter;
-    console.log(this.#filterType);
-    const films = this.prepearFilms([...this.#filmsModel.get()]);
-    console.log(films);
-    const filteredFilms = filter[this.#filterType](films);
+    const filterType = this.#filterModel.filter;
+    const films = [...this.#filmsModel.get()];
+    const filteredFilms = this.prepearFilms(filter[filterType](films));
 
     switch (this.#currentSortType) {
       case SortType.DATE_DOWN:
@@ -96,7 +87,8 @@ export default class FilmsListPresenter {
         this.#renderAllFilms();
         break;
       case UpdateType.MAJOR:
-        this.#clearFilmsList();
+        this.#clearFilmsList({resetRenderedTaskCount: true});
+        this.#renderAllFilms();
         break;
     }
   };
@@ -122,6 +114,8 @@ export default class FilmsListPresenter {
     films.slice(0, this.#renderedFilmCount + FILMS_COUNT_PER_STEP).forEach((film) => {
       this.#createFilm(film);
     });
+
+    this.#renderedFilmCount = FILMS_COUNT_PER_STEP;
 
 
     if ( films.length > 2) {
@@ -153,6 +147,7 @@ export default class FilmsListPresenter {
     const filmCount = this.films.length;
 
     this.#filmPresenter.forEach((presenter) => presenter.destroy());
+
     this.#filmPresenter.clear();
 
     remove(this.#sortComponent);
@@ -161,7 +156,7 @@ export default class FilmsListPresenter {
     remove(this.#navigationComponent);
 
     if (resetRenderedTaskCount) {
-      this.#renderedFilmCount = FILMS_COUNT_PER_STEP;
+      this.#renderedFilmCount = 0;
     } else {
       this.#renderedFilmCount = Math.min(filmCount, this.#renderedFilmCount);
     }
@@ -174,6 +169,7 @@ export default class FilmsListPresenter {
   #handleLoadMoreButtonClick = () => {
     const taskCount = this.films.length;
     const newRenderedTaskCount = Math.min(taskCount, this.#renderedFilmCount + FILMS_COUNT_PER_STEP);
+    console.log(taskCount, this.#renderedFilmCount, newRenderedTaskCount);
     const tasks = this.films.slice(this.#renderedFilmCount, newRenderedTaskCount);
 
     tasks.forEach((card) => this.#createFilm(card));
@@ -188,6 +184,7 @@ export default class FilmsListPresenter {
     if (this.#currentSortType === sortType) {
       return;
     }
+
     this.#currentSortType = sortType;
     this.#clearFilmsList({resetRenderedTaskCount: true});
     this.#renderAllFilms();
