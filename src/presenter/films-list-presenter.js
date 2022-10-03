@@ -25,6 +25,7 @@ export default class FilmsListPresenter {
   #sortComponent = null;
   #navigationComponent = null;
   #renderedFilmCount = 0;
+  #openPopup = null;
 
   constructor({ extra, container, title = '', hiddenTitle = false, resetView, filmsModel = null, filterModel = null }) {
     this.#container = container;
@@ -134,11 +135,18 @@ export default class FilmsListPresenter {
   };
 
   #createFilm = (film) => {
-    const filmPresenter = new FilmPresenter(
-      this.filmsListContainerView.element,
-      this.#handleViewAction,
-      this.#resetView,
-      this.#handleModelEvent );
+    let filmPresenter;
+
+    if (this.#openPopup && film.id === this.#openPopup.id) {
+      filmPresenter = this.#openPopup.presenter;
+    } else {
+      filmPresenter = new FilmPresenter(
+        this.filmsListContainerView.element,
+        this.#handleViewAction,
+        this.#resetView,
+        this.#handleModelEvent );
+    }
+
     filmPresenter.init(film, [...this.#commentsModel.get(film)]);
     this.#filmPresenter.set(film.id, filmPresenter);
   };
@@ -146,7 +154,13 @@ export default class FilmsListPresenter {
   #clearFilmsList = ({resetRenderedTaskCount = false, resetSortType = false} = {}) => {
     const filmCount = this.films.length;
 
-    this.#filmPresenter.forEach((presenter) => presenter.destroy());
+    this.#filmPresenter.forEach((presenter, id) => {
+      if (presenter.isPopupOpen) {
+        this.#openPopup = {presenter, id};
+      } else {
+        presenter.destroy();
+      }
+    });
 
     this.#filmPresenter.clear();
 

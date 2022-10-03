@@ -14,9 +14,12 @@ export default class FilmPresenter {
   #filmCardView = null;
   #changeData = null;
   #film = null;
-  #isPopupOpen = false;
   #resetView = null;
   #mode = Mode.DEFAULT;
+
+  get isPopupOpen () {
+    return this.#mode === Mode.OPEN;
+  }
 
   constructor(container, changeData, resetView) {
     this.#container = container;
