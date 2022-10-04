@@ -11,7 +11,6 @@ export default class FilmsListView extends AbstractView {
   #title = null;
   #hiddenTitle = null;
   #extra = null;
-  #element = null;
 
   constructor(title = '', hiddenTitle, extra) {
     super();

@@ -1,38 +1,40 @@
-import FilmsView from '../view/films-view.js';
 import FilmsListView from '../view/films-list-view.js';
 import FilmsEmptyListView from '../view/films-list-empty.js';
 import FilmsListContainerView from '../view/films-list-container-view.js';
-import { render, remove, RenderPosition } from '../framework/render.js';
+import {remove, render, RenderPosition} from '../framework/render.js';
 import FilmPresenter from './film-presenter.js';
 import LoadMoreButtonView from '../view/load-more-button-view.js';
 import SortView from '../view/sort-view.js';
 import {sortByDateDown, sortByRatingDown} from '../utils/sort.js';
-import { SortType, UserAction, UpdateType } from '../const.js';
-import {filter } from '../utils/filter.js';
+import {SortType, UpdateType, UserAction} from '../const.js';
+import {filter} from '../utils/filter.js';
+import LoadingView from '../view/loading-view.js';
 
 const FILMS_COUNT_PER_STEP = 5;
 export default class FilmsListPresenter {
   #container = null;
+
+  #filmsModel = null;
+  #filterModel = null;
+  #commentsModel = null;
+
   #filmsListView = null;
   #filmsEmptyListView = null;
-  #filmsModel = null;
-  #commentsModel = null;
-  #loadMoreButtonComponent = null;
-  #filmPresenter = new Map();
+  #loadMoreButtonView = null;
   #resetView = null;
-  #filterModel = null;
+  #sortView = null;
+  #navigationView = null;
+
+  #filmPresenters = new Map();
   #currentSortType = SortType.DEFAULT;
-  #sortComponent = null;
-  #navigationComponent = null;
-  #renderedFilmCount = 0;
+
+  #renderedFilmCount = FILMS_COUNT_PER_STEP;
+
   #openPopup = null;
+  #loadingComponent = new LoadingView();
+  #isLoading = true;
 
-  #comments = null;
-  #film = null;
-
-  #changeData = null;
-
-  constructor({ extra, container, title = '', hiddenTitle = false, resetView, filmsModel = null, filterModel = null }) {
+  constructor({extra, container, title = '', hiddenTitle = false, resetView, filmsModel = null, filterModel = null, commentsModel = null}) {
     this.#container = container;
     this.#filmsEmptyListView = new FilmsEmptyListView();
     this.#filmsListView = new FilmsListView(
@@ -43,19 +45,22 @@ export default class FilmsListPresenter {
     this.#resetView = resetView;
     this.#filmsModel = filmsModel;
     this.#filterModel = filterModel;
+    this.#commentsModel = commentsModel;
 
     this.#filmsModel?.addObserver(this.#handleModelEvent);
     this.#filterModel?.addObserver(this.#handleModelEvent);
+    this.#commentsModel?.addObserver(this.#handleModelEvent);
   }
 
   filmsListContainerView = new FilmsListContainerView();
 
-  prepearFilms = (films) => films;
+  prepareFilms = (films) => films;
 
   get films() {
     const filterType = this.#filterModel.filter;
     const films = [...this.#filmsModel.get()];
-    const filteredFilms = this.prepearFilms(filter[filterType](films));
+    // console.log(films);
+    const filteredFilms = this.prepareFilms(filter[filterType](films));
 
     switch (this.#currentSortType) {
       case SortType.DATE_DOWN:
@@ -73,11 +78,10 @@ export default class FilmsListPresenter {
         this.#filmsModel.update(updateType, update);
         break;
       case UserAction.ADD_COMMENT:
-        this.#filmsModel.update(updateType, update.film);
+        this.#filmsModel.update(updateType, update.id);
         this.#commentsModel.add(updateType, update);
         break;
       case UserAction.DELETE_COMMENT:
-        this.#filmsModel.update(updateType, update);
         this.#commentsModel.delete(updateType, update);
         break;
     }
@@ -86,7 +90,7 @@ export default class FilmsListPresenter {
   #handleModelEvent = (updateType, data) => {
     switch (updateType) {
       case UpdateType.PATCH:
-        this.#filmPresenter.get(data.id).init(data, this.#commentsModel.get(data.id));
+        this.#filmPresenters.get(data.id).init(data, this.#commentsModel.get(data));
         break;
       case UpdateType.MINOR:
         this.#clearFilmsList();
@@ -96,13 +100,22 @@ export default class FilmsListPresenter {
         this.#clearFilmsList({resetRenderedTaskCount: true});
         this.#renderAllFilms();
         break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
+        this.#renderAllFilms();
+        break;
     }
   };
-
 
   init = (filmsModel, commentsModel) => {
     this.#filmsModel = filmsModel;
     this.#commentsModel = commentsModel;
+
+    if (this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
 
     render(this.#filmsListView, this.#container.element);
 
@@ -114,52 +127,51 @@ export default class FilmsListPresenter {
     this.#renderAllFilms();
   };
 
+  #renderLoading = () => {
+    render(this.#loadingComponent, this.#container.element, RenderPosition.BEFOREEND);
+  };
+
   #renderAllFilms = () => {
     const films = this.films;
 
-    films.slice(0, this.#renderedFilmCount + FILMS_COUNT_PER_STEP).forEach((film) => {
+    films.slice(0, this.#renderedFilmCount).forEach((film) => {
       this.#createFilm(film);
     });
 
     this.#renderedFilmCount = FILMS_COUNT_PER_STEP;
 
 
-    if ( films.length > 2) {
+    if (films.length > 2) {
       this.#renderSort();
     }
 
-    if( films.length > this.#renderedFilmCount) {
-      this.#loadMoreButtonComponent = new LoadMoreButtonView();
-      render(this.#loadMoreButtonComponent, this.#filmsListView.element);
-      this.#loadMoreButtonComponent.setClickHandler(this.#handleLoadMoreButtonClick);
+    if (films.length > this.#renderedFilmCount) {
+      this.#loadMoreButtonView = new LoadMoreButtonView();
+      render(this.#loadMoreButtonView, this.#filmsListView.element);
+      this.#loadMoreButtonView.setClickHandler(this.#handleLoadMoreButtonClick);
     }
-  };
-
-  #handleModeChange = () => {
-    this.#filmPresenter.forEach((presenter) => presenter.resetView());
   };
 
   #createFilm = (film) => {
-    let filmPresenter;
+    let filmPresenters;
 
     if (this.#openPopup && film.id === this.#openPopup.id) {
-      filmPresenter = this.#openPopup.presenter;
+      filmPresenters = this.#openPopup.presenter;
     } else {
-      filmPresenter = new FilmPresenter(
+      filmPresenters = new FilmPresenter(
         this.filmsListContainerView.element,
         this.#handleViewAction,
         this.#resetView,
-        this.#handleModelEvent );
+        this.#commentsModel
+      );
     }
 
-    filmPresenter.init(film, [...this.#commentsModel.get(film)]);
-    this.#filmPresenter.set(film.id, filmPresenter);
+    filmPresenters.init(film, [...this.#commentsModel.get(film)]);
+    this.#filmPresenters.set(film.id, filmPresenters);
   };
 
   #clearFilmsList = ({resetRenderedTaskCount = false, resetSortType = false} = {}) => {
-    const filmCount = this.films.length;
-
-    this.#filmPresenter.forEach((presenter, id) => {
+    this.#filmPresenters.forEach((presenter, id) => {
       if (presenter.isPopupOpen) {
         this.#openPopup = {presenter, id};
       } else {
@@ -167,17 +179,14 @@ export default class FilmsListPresenter {
       }
     });
 
-    this.#filmPresenter.clear();
+    this.#filmPresenters.clear();
 
-    remove(this.#sortComponent);
-    // remove(this.#noTaskComponent);
-    remove(this.#loadMoreButtonComponent);
-    remove(this.#navigationComponent);
+    remove(this.#sortView);
+    remove(this.#loadMoreButtonView);
+    remove(this.#navigationView);
 
     if (resetRenderedTaskCount) {
-      this.#renderedFilmCount = 0;
-    } else {
-      this.#renderedFilmCount = Math.min(filmCount, this.#renderedFilmCount);
+      this.#renderedFilmCount = FILMS_COUNT_PER_STEP;
     }
 
     if (resetSortType) {
@@ -194,7 +203,7 @@ export default class FilmsListPresenter {
     this.#renderedFilmCount = newRenderedTaskCount;
 
     if (this.#renderedFilmCount >= taskCount) {
-      remove(this.#loadMoreButtonComponent);
+      remove(this.#loadMoreButtonView);
     }
   };
 
@@ -208,14 +217,14 @@ export default class FilmsListPresenter {
     this.#renderAllFilms();
   };
 
-  #renderSort = ()=> {
-    this.#sortComponent = new SortView(this.#currentSortType);
-    this.#sortComponent.setSortTypeChangeHandler(this.#handleSortTypeChange);
-    render(this.#sortComponent, this.#container.element, RenderPosition.BEFOREBEGIN);
+  #renderSort = () => {
+    this.#sortView = new SortView(this.#currentSortType);
+    this.#sortView.setSortTypeChangeHandler(this.#handleSortTypeChange);
+    render(this.#sortView, this.#container.element, RenderPosition.BEFOREBEGIN);
   };
 
   handleResetDetail = () => {
     this.#openPopup = null;
-    this.#filmPresenter.forEach((presenter) => presenter.resetDetailsView());
+    this.#filmPresenters.forEach((presenter) => presenter.resetDetailsView());
   };
 }

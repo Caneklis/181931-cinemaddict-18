@@ -7,9 +7,14 @@ import FilterModel from './model/filter-model.js';
 
 import FilterPresenter from './presenter/filter-presenter.js';
 
+import FilmsApiService from './films-api-server.js';
+
+const AUTHORIZATION = 'Basic er777jdzbds';
+const END_POINT = 'https://18.ecmascript.pages.academy/cinemaddict/';
+
 const siteMainHeader = document.querySelector('.header');
 const siteMainElement = document.querySelector('.main');
-const filmsModel = new FilmsModel();
+const filmsModel = new FilmsModel(new FilmsApiService(END_POINT, AUTHORIZATION));
 const filterModel = new FilterModel();
 const commentsModel = new CommentsModel(filmsModel);
 
@@ -20,5 +25,6 @@ const filmsPresenter = new FilmsPresenter(siteMainElement, filmsModel, commentsM
 
 const filterPresenter = new FilterPresenter(siteMainElement, filmsModel, filterModel);
 
+filmsModel.init();
 filmsPresenter.init();
 filterPresenter.init();

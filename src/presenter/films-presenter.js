@@ -1,5 +1,4 @@
 import FilmsView from '../view/films-view.js';
-import SortView from '../view/sort-view.js';
 import { render } from '../framework/render.js';
 import FilmsListRatedPresenter from './films-list-rated-presenter.js';
 import FilmsListAllPresenter from './films-list-all-presenter.js';
@@ -11,8 +10,6 @@ export default class FilmsPresenter {
   #filmsModel = null;
   #filterModel = null;
   #commentsModel = null;
-  #films = null;
-  #sortComponent = new SortView();
 
   constructor(container, filmsModel, commentsModel, filterModel) {
     this.#container = container;
@@ -29,49 +26,53 @@ export default class FilmsPresenter {
 
   init = () => {
 
-    const films = this.prepearFilms([...this.#filmsModel.get()]);
+    // const films = this.prepearFilms([...this.#filmsModel.get()]);
 
     render(this.#filmView, this.#container);
-    if (films.length > 0) {
+    // if (films.length > 0) {
 
-      const filmsMainPresenter = new FilmsListAllPresenter({
-        container: this.#filmView,
-        resetView: this.#handleResetDetail,
-        filmsModel: this.#filmsModel,
-        filterModel: this.#filterModel
-      });
-      this.filmsListPresenters.set('main-presenter', filmsMainPresenter);
+    const filmsMainPresenter = new FilmsListAllPresenter({
+      container: this.#filmView,
+      resetView: this.#handleResetDetail,
+      filmsModel: this.#filmsModel,
+      filterModel: this.#filterModel,
+      commentsModel: this.#commentsModel
+    });
+    this.filmsListPresenters.set('main-presenter', filmsMainPresenter);
 
-      filmsMainPresenter.init(this.#filmsModel, this.#commentsModel, this.#filterModel);
+    filmsMainPresenter.init(this.#filmsModel, this.#commentsModel, this.#filterModel);
 
-      const filmsTopPresenter = new FilmsListRatedPresenter({
-        container: this.#filmView,
-        resetView: this.#handleResetDetail,
-        filmsModel: this.#filmsModel,
-        filterModel: this.#filterModel
-      });
-      this.filmsListPresenters.set('top-presenter', filmsTopPresenter);
-      filmsTopPresenter.init(this.#filmsModel, this.#commentsModel,
-        this.#filterModel
-      );
+    const filmsTopPresenter = new FilmsListRatedPresenter({
+      container: this.#filmView,
+      resetView: this.#handleResetDetail,
+      filmsModel: this.#filmsModel,
+      filterModel: this.#filterModel,
+      commentsModel: this.#commentsModel
+    });
 
-      const filmsMostCommentedPresenter = new FilmsListMostCommentedPresenter({
-        container: this.#filmView,
-        resetView: this.#handleResetDetail,
-        filmsModel: this.#filmsModel,
-        filterModel: this.#filterModel
-      });
-      this.filmsListPresenters.set('most-view-presenter', filmsMostCommentedPresenter);
-      filmsMostCommentedPresenter.init(this.#filmsModel, this.#commentsModel,
-        this.#filterModel
-      );
-    } else {
-      const filmsEmptyPresenter = new FilmsEmptyListPresenter({
-        container: this.#filmView,
-      });
+    this.filmsListPresenters.set('top-presenter', filmsTopPresenter);
+    filmsTopPresenter.init(this.#filmsModel, this.#commentsModel,
+      this.#filterModel
+    );
 
-      filmsEmptyPresenter.init(this.#filmsModel, this.#commentsModel, this.#filterModel);
-    }
+    const filmsMostCommentedPresenter = new FilmsListMostCommentedPresenter({
+      container: this.#filmView,
+      resetView: this.#handleResetDetail,
+      filmsModel: this.#filmsModel,
+      filterModel: this.#filterModel,
+      commentsModel: this.#commentsModel
+    });
+    this.filmsListPresenters.set('most-view-presenter', filmsMostCommentedPresenter);
+    filmsMostCommentedPresenter.init(this.#filmsModel, this.#commentsModel,
+      this.#filterModel
+    );
+    // } else {
+    //   const filmsEmptyPresenter = new FilmsEmptyListPresenter({
+    //     container: this.#filmView,
+    //   });
+
+    //   // filmsEmptyPresenter.init(this.#filmsModel, this.#commentsModel, this.#filterModel);
+    // }
   };
 
   #handleResetDetail = () => {

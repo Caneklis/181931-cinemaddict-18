@@ -1,22 +1,23 @@
-import { generateComments } from '../mock/comment.js';
+import {generateComments} from '../mock/comment.js';
+import Observable from '../framework/observable';
 
-export default class CommentsModel {
+export default class CommentsModel extends Observable {
   #filmsModel = null;
   #allComments = [];
   #comments = [];
 
   constructor(filmsModel) {
+    super();
     this.#filmsModel = filmsModel;
     this.#generateAllComments();
-
   }
 
   #generateAllComments() {
     this.#allComments = generateComments(this.#filmsModel.get());
   }
 
-  get = (film)=> {
-    this.#comments = film.comments.map((commentId) => this.#allComments.find((comment)=>comment.id === commentId));
+  get = (film) => {
+    this.#comments = film.comments.map((commentId) => this.#allComments.find((comment) => comment.id === commentId)).filter(Boolean);
 
     return this.#comments;
   };
@@ -27,11 +28,13 @@ export default class CommentsModel {
   };
 
   delete = (updateType, update) => {
-    const index = this.#allComments.findIndex((comment) => comment.id === update.id);
+    const index = this.#allComments.findIndex((comment) => comment.id === update.commentId);
     if (index === -1) {
       throw new Error('Can\'t update unexisting comment');
     }
-    this.#allComments = [...this.#allComments.slice(0, index), ...this.#allComments(index + 1)];
-    this._notify(updateType);
+
+    this.#allComments = [...this.#allComments.slice(0, index), ...this.#allComments.slice(index + 1)];
+
+    this._notify(updateType, update);
   };
 }

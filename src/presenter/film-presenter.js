@@ -1,8 +1,9 @@
 import PopupView from '../view/popup-view.js';
-import { render, remove, replace } from '../framework/render.js';
+import {remove, render, replace} from '../framework/render.js';
 import FilmCardView from '../view/film-card-view.js';
-import { isEscapeKey } from '../utils/common.js';
-import { UserAction, UpdateType } from '../const.js';
+import {isEscapeKey} from '../utils/common.js';
+import {UpdateType, UserAction} from '../const.js';
+import { nanoid } from 'nanoid';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -17,7 +18,7 @@ export default class FilmPresenter {
   #resetView = null;
   #mode = Mode.DEFAULT;
 
-  get isPopupOpen () {
+  get isPopupOpen() {
     return this.#mode === Mode.OPEN;
   }
 
@@ -27,18 +28,20 @@ export default class FilmPresenter {
     this.#resetView = resetView;
   }
 
-  init = (film, comments) =>{
+  init = (film, comments) => {
     this.#film = film;
     this.#renderFilm(film, comments);
   };
 
-  #renderFilm(film,comments) {
+  #renderFilm(film, comments) {
     const oldFilmView = this.#filmCardView;
     this.#filmCardView = new FilmCardView(film);
     this.#filmCardView.setFavoriteClickHandler(this.#handleFavoriteClick);
     this.#filmCardView.setArchiveClickHandler(this.#handleArchiveClick);
     this.#filmCardView.setWatchListClickHandler(this.#handleWatchListClick);
-    this.#filmCardView.setOpenClickHandler(()=>{this.#renderFilmPopup(film,comments);});
+    this.#filmCardView.setOpenClickHandler(() => {
+      this.#renderFilmPopup(film, comments);
+    });
 
     if (oldFilmView === null) {
       render(this.#filmCardView, this.#container);
@@ -56,13 +59,13 @@ export default class FilmPresenter {
 
   #getUpdateType = (isChecked, isFiltered) => !isChecked && isFiltered ? UpdateType.MINOR : UpdateType.PATCH;
 
-  #updatePopup = (film, comments) => {
+  #createPopup = (film, comments) => {
     this.#popup = new PopupView(film, comments);
     this.#popup.setFavoriteClickHandler(this.#handleFavoriteClick);
     this.#popup.setArchiveClickHandler(this.#handleArchiveClick);
     this.#popup.setWatchListClickHandler(this.#handleWatchListClick);
     this.#popup.setCloseClickHandler(this.#hideFilmPopup);
-    this.#popup.setDeleteCommentHandler(this.#handleDeleteCommentClick);
+    this.#popup.setDeleteCommentHandlers(this.#handleDeleteCommentClick);
   };
 
   #renderFilmPopup = (film, comments) => {
@@ -70,23 +73,24 @@ export default class FilmPresenter {
       this.#resetView();
       window.addEventListener('keydown', this.#onWindowKeydown);
       document.body.classList.add('hide-overflow');
-      this.#updatePopup(film, comments);
+      this.#createPopup(film, comments);
       render(this.#popup, document.body);
       this.#mode = Mode.OPEN;
+
+      this.#popup.setFormSubmitHandler((update) => {
+        this.#handleFormSubmit(update);
+      });
     }
   };
 
   #replaceFilmPopup = (film, comments) => {
     if (this.#mode === Mode.OPEN) {
-      const oldPopup = this.#popup;
-      this.#updatePopup(film, comments);
-      replace(this.#popup, oldPopup);
-      remove(oldPopup);
+      this.#popup.reset(film, comments);
     }
   };
 
   resetDetailsView = () => {
-    if(this.#mode === Mode.OPEN) {
+    if (this.#mode === Mode.OPEN) {
       this.#hideFilmPopup();
     }
   };
@@ -109,6 +113,21 @@ export default class FilmPresenter {
       evt.preventDefault();
       this.#hideFilmPopup();
     }
+  };
+
+  #handleFormSubmit = (update) => {
+
+    this.#changeData(
+      UserAction.UPDATE_FILM,
+      UpdateType.MINOR,
+      {...this.#film, comments: {id: nanoid(), ...update}},
+    );
+
+    this.#changeData(
+      UserAction.ADD_COMMENT,
+      UpdateType.MINOR,
+      update,
+    );
   };
 
   #handleWatchListClick = () => {
@@ -135,11 +154,22 @@ export default class FilmPresenter {
     );
   };
 
-  #handleDeleteCommentClick = ( comments ) => {
-    this.#changeData(
-      UserAction.DELETE_COMMENT,
-      UpdateType.PATCH,
-      {...this.#film, comments }
-    );
+  #handleDeleteCommentClick = (update) => {
+    const comments = [...this.#film.comments];
+    const commentIndex = comments.findIndex((commentId) => commentId === update.commentId);
+
+    if (commentIndex > -1) {
+      this.#changeData(
+        UserAction.UPDATE_FILM,
+        UpdateType.MINOR,
+        {...this.#film, comments: [...comments.slice(0, commentIndex), ...comments.slice(commentIndex + 1)]},
+      );
+
+      this.#changeData(
+        UserAction.DELETE_COMMENT,
+        UpdateType.MINOR,
+        update,
+      );
+    }
   };
 }
