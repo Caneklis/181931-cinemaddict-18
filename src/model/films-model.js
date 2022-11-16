@@ -1,9 +1,7 @@
 import Observable from '../framework/observable.js';
-// import { generateCards } from '../mock/card.js';
 import { UpdateType } from '../const.js';
 
 export default class FilmsModel extends Observable {
-  // #films = generateCards();
   #films = [];
   #filmsApiService = null;
 
@@ -12,7 +10,6 @@ export default class FilmsModel extends Observable {
     this.#filmsApiService = filmsApiService;
 
     this.#filmsApiService.films.then((films) => {
-      // console.log(films.map(this.#adaptToClient));
       films.map(this.#adaptToClient);
     });
   }

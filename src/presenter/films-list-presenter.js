@@ -34,7 +34,7 @@ export default class FilmsListPresenter {
   #loadingComponent = new LoadingView();
   #isLoading = true;
 
-  constructor({extra, container, title = '', hiddenTitle = false, resetView, filmsModel = null, filterModel = null, commentsModel = null}) {
+  constructor({extra, container, title = '', showLoading = false, hiddenTitle = false, resetView, filmsModel = null, filterModel = null, commentsModel = null}) {
     this.#container = container;
     this.#filmsEmptyListView = new FilmsEmptyListView();
     this.#filmsListView = new FilmsListView(
@@ -42,6 +42,7 @@ export default class FilmsListPresenter {
       hiddenTitle,
       extra
     );
+    this.showLoading = showLoading;
     this.#resetView = resetView;
     this.#filmsModel = filmsModel;
     this.#filterModel = filterModel;
@@ -103,6 +104,7 @@ export default class FilmsListPresenter {
       case UpdateType.INIT:
         this.#isLoading = false;
         remove(this.#loadingComponent);
+        this.#renderContainers();
         this.#renderAllFilms();
         break;
     }
@@ -112,19 +114,27 @@ export default class FilmsListPresenter {
     this.#filmsModel = filmsModel;
     this.#commentsModel = commentsModel;
 
-    if (this.#isLoading) {
+    if (this.#isLoading && this.showLoading) {
       this.#renderLoading();
       return;
     }
 
-    render(this.#filmsListView, this.#container.element);
-
-    render(
-      this.filmsListContainerView,
-      this.#filmsListView.element
-    );
-
     this.#renderAllFilms();
+  };
+
+  #containerCreated = false;
+
+  #renderContainers = () => {
+    if(!this.#containerCreated) {
+      render(this.#filmsListView, this.#container.element);
+
+      render(
+        this.filmsListContainerView,
+        this.#filmsListView.element
+      );
+
+      this.#containerCreated = true;
+    }
   };
 
   #renderLoading = () => {
@@ -195,14 +205,14 @@ export default class FilmsListPresenter {
   };
 
   #handleLoadMoreButtonClick = () => {
-    const taskCount = this.films.length;
-    const newRenderedTaskCount = Math.min(taskCount, this.#renderedFilmCount + FILMS_COUNT_PER_STEP);
-    const tasks = this.films.slice(this.#renderedFilmCount, newRenderedTaskCount);
+    const filmCount = this.films.length;
+    const newRenderedFilmCount = Math.min(filmCount, this.#renderedFilmCount + FILMS_COUNT_PER_STEP);
+    const tasks = this.films.slice(this.#renderedFilmCount, newRenderedFilmCount);
 
     tasks.forEach((card) => this.#createFilm(card));
-    this.#renderedFilmCount = newRenderedTaskCount;
+    this.#renderedFilmCount = newRenderedFilmCount;
 
-    if (this.#renderedFilmCount >= taskCount) {
+    if (this.#renderedFilmCount >= filmCount) {
       remove(this.#loadMoreButtonView);
     }
   };
